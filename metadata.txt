@@ -1,0 +1,48 @@
+# This file contains metadata for your plugin
+
+[general]
+
+name=Coleta Rural
+
+qgisMinimumVersion=3.28
+
+description=Imports Coleta Rural PDF survey reports and automatically creates polygon features in QGIS vector layers.
+
+version=1.0.0
+
+author=Dihêgo Augusto Gomes Malvim de Barros - INCRA Pernambuco
+
+email=cadastrorural.pe@incra.gov.br
+
+about=Plugin developed by Dihêgo Augusto Gomes Malvim de Barros, Technical Assistant for Land Governance at INCRA Pernambuco. It automatically imports Coleta Rural PDF survey reports, extracts parcel information and coordinates, generates polygon geometries, and saves features directly into configured QGIS vector layers.
+
+homepage=https://coletaruralpe.netlify.app
+
+tracker=https://coletaruralpe.netlify.app
+
+repository=https://coletaruralpe.netlify.app
+
+hasProcessingProvider=no
+
+tags=coleta rural, memorial descritivo, cadastro rural, incra, qgis, georreferenciamento, regularização fundiária, sig
+
+category=Vector
+
+icon=icon.png
+
+experimental=False
+
+deprecated=False
+
+server=False
+
+changelog=
+    1.0.0
+    - Primeira versão oficial do plugin Coleta Rural.
+    - Importação automática de memoriais PDF.
+    - Extração de coordenadas geográficas.
+    - Geração automática de polígonos.
+    - Visualização prévia da geometria no mapa.
+    - Configuração de camadas permitidas.
+    - Salvamento automático de feições em camadas vetoriais.
+    - Preenchimento automático dos atributos do imóvel.

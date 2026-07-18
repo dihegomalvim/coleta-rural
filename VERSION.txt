@@ -1,0 +1,8 @@
+Coleta Rural
+Versão: 1.0.0
+Data: 18/07/2026
+
+Desenvolvedor:
+Dihêgo Augusto Gomes Malvim de Barros
+
+Primeira versão operacional do plugin.
