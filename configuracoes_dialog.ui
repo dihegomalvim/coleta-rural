@@ -45,16 +45,29 @@
      <x>20</x>
      <y>50</y>
      <width>256</width>
-     <height>201</height>
+     <height>171</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnCamadaPadrao">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>225</y>
+     <width>256</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Incluir Camada Padrão</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btnAtualizar">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>260</y>
-     <width>111</width>
+     <x>20</x>
+     <y>258</y>
+     <width>121</width>
      <height>23</height>
     </rect>
    </property>
@@ -65,9 +78,9 @@
   <widget class="QPushButton" name="btnSalvarConfig">
    <property name="geometry">
     <rect>
-     <x>180</x>
-     <y>260</y>
-     <width>75</width>
+     <x>155</x>
+     <y>258</y>
+     <width>121</width>
      <height>23</height>
     </rect>
    </property>

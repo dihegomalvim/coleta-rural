@@ -1,8 +1,58 @@
 Coleta Rural
-Versão: 1.0.0
-Data: 18/07/2026
+Versão: 1.2.1
+Data: 14/08/2026
 
 Desenvolvedor:
 Dihêgo Augusto Gomes Malvim de Barros
 
-Primeira versão operacional do plugin.
+Tela principal reorganizada em 4 abas, com "Camada de destino" e o botão
+"Gerir Camadas" sempre visíveis no topo, independente da aba ativa.
+
+- "Memorial Coleta Rural" (fluxo original, inalterado): importa o PDF
+  gerado pelo sistema Coleta Rural. Ganhou dois campos novos, CIR (com
+  máscara) e Matrícula, para preencher antes de salvar — evita ter que
+  editar a camada depois só para completar esses dois campos.
+
+- "Memorial Genérico" (antes "Memorial Manual"): importa memoriais
+  descritivos que não vêm do sistema Coleta Rural, anexando o PDF, o
+  arquivo de geometria (KML/GeoJSON/SHP/DXF), ou colando o texto já com
+  OCR feito externamente. Reconhece automaticamente os dados do imóvel
+  (inclusive rótulos alternativos como "PROPRIETÁRIO") e as coordenadas
+  no texto corrido — geográficas ou UTM, inclusive em graus-minutos-
+  segundos (rotuladas ou em prosa corrida, ex.: "de coordenadas
+  -8°11'09,909" S e -35°46'12,804" W"), em tabela de duas colunas, ou em
+  formato de poligonal (vértice inicial com coordenada conhecida seguido
+  de segmentos por azimute/distância ou por rumo quadrantal, ex.:
+  "NE 45°30'20"") —,
+  corrigindo sozinho a ordem longitude/latitude e o sinal negativo, com
+  tabela de conferência e cálculo automático da área a partir das
+  coordenadas. Detecta o fuso e o datum informados no texto (SIRGAS2000,
+  SAD69 ou WGS84); se não informado, pergunta. Campo CPF/CNPJ formata
+  sozinho conforme a quantidade de dígitos digitados. Avisa quando um
+  vértice fica muito mais distante dos vizinhos do que o resto do
+  perímetro (possível dígito perdido/trocado no memorial de origem).
+
+- "Zoom Rápido": digite uma coordenada e clique em "Visualizar
+  Localização" para centralizar o mapa no local com um marcador
+  temporário, sem criar camada nenhuma. Três opções de coordenada:
+  Geográfica (graus-minutos-segundos), Geográfica (decimal) ou UTM
+  (pede o fuso). Os campos mostram um exemplo do formato esperado como
+  texto cinza.
+
+- "Gerar Memorial" (nova): gera o memorial descritivo em PDF, no mesmo
+  layout do app oficial Coleta Rural (com a logo do INCRA), a partir de
+  um ou mais polígonos já selecionados numa camada do projeto — sem
+  depender de texto ou PDF importado. Se mais de um polígono estiver
+  selecionado, só gera se forem adjacentes (compartilharem uma borda de
+  verdade, não só um vértice); nesse caso mescla num contorno externo
+  único, desenhando os limites internos originais no croqui (linha
+  tracejada) com uma etiqueta em cada um (Matrícula, ou CIR quando não
+  houver Matrícula). Reconhece automaticamente os campos de camadas
+  públicas oficiais — SIGEF Brasil e CAR/SICAR — pré-preenchendo CIR,
+  Matrícula, Imóvel, Município e UF quando disponíveis, e citando a
+  fonte do polígono no memorial gerado. O croqui usa imagem de satélite
+  de fundo (Esri World Imagery, com o crédito da fonte), mostrando só
+  o(s) polígono(s) do imóvel de forma translúcida. O cabeçalho traz um
+  link direto para o centro do imóvel no Google Maps. A lista de
+  coordenadas se organiza em até 4 colunas por página, continuando em
+  página(s) extras quando necessário, sem nunca invadir o rodapé.

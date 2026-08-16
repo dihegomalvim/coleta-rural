@@ -6,21 +6,23 @@ name=Coleta Rural
 
 qgisMinimumVersion=3.28
 
-description=Imports Coleta Rural PDF survey reports and automatically creates polygon features in QGIS vector layers.
+description=Imports Coleta Rural PDF survey reports and other memorial descritivo formats (any Brazilian state), automatically creating polygon features in QGIS vector layers — and generates memorial descritivo PDF reports from selected polygons, recognizing SIGEF/CAR public layers.
 
-version=1.0.0
+version=1.2.1
 
 author=Dihêgo Augusto Gomes Malvim de Barros - INCRA Pernambuco
 
 email=cadastrorural.pe@incra.gov.br
 
-about=Plugin developed by Dihêgo Augusto Gomes Malvim de Barros, Technical Assistant for Land Governance at INCRA Pernambuco. It automatically imports Coleta Rural PDF survey reports, extracts parcel information and coordinates, generates polygon geometries, and saves features directly into configured QGIS vector layers.
+about=Plugin developed by Dihêgo Augusto Gomes Malvim de Barros, Technical Assistant for Land Governance at INCRA Pernambuco. It automatically imports Coleta Rural PDF survey reports from any Brazilian state (or memoriais descritivos from other sources, via text/PDF or a KML/GeoJSON/SHP/DXF geometry file), extracts parcel information and coordinates, generates polygon geometries, and saves features directly into configured QGIS vector layers. It can also generate a memorial descritivo PDF report (matching the official Coleta Rural layout, with a satellite basemap croqui) directly from one or more polygons already selected in a project layer — merging adjacent polygons into a single boundary when more than one is selected, and automatically recognizing SIGEF Brasil and CAR/SICAR public layer schemas to pre-fill CIR, Matrícula, Imóvel, Município and UF.
 
-homepage=https://coletaruralpe.netlify.app
 
-tracker=https://coletaruralpe.netlify.app
+homepage=https://coletarural.netlify.app
 
-repository=https://coletaruralpe.netlify.app
+repository=https://github.com/dihegomalvim/coleta-rural
+
+tracker=https://github.com/dihegomalvim/coleta-rural/issues
+
 
 hasProcessingProvider=no
 
@@ -37,6 +39,77 @@ deprecated=False
 server=False
 
 changelog=
+    1.2.1
+    Aba "Memorial Genérico":
+    - Reconhecimento de memoriais descritivos em formato de poligonal (azimute e distância entre vértices, a partir de um vértice inicial com coordenada UTM conhecida), formato topográfico tradicional comum em memoriais mais antigos.
+    - Reconhecimento também do mesmo formato de poligonal quando descrito por rumo (quadrante + ângulo, ex.: "NE 45°30'20"") em vez de azimute em graus decimais.
+    - Corrigido um bug em que um rótulo sem valor na frente (ex.: "Imóvel:" sozinho numa linha) preenchia o campo com um ":" literal em vez do nome de verdade.
+    - Reconhecimento automático de dados do imóvel agora tolera acento apagado pelo OCR (ex.: "Municipio" reconhecido como "Município").
+    - Corrigido um falso positivo em que "MUNICÍPIO" confundia com "MUNICÍPIOS ABRANGIDOS" (seção diferente do memorial).
+    - Nova detecção do formato "rótulos todos juntos, valores bem mais abaixo" (comum quando o texto vem de OCR externo aplicado a um PDF escaneado).
+    - Corrigido um bug sério de reconhecimento de coordenadas: memoriais que descrevem cada vértice em prosa corrida ("de coordenadas -8°11'09,909" S e -35°46'12,804" W"), sem rótulo explícito Longitude/Latitude, caíam no reconhecimento genérico e geravam uma área e um polígono completamente errados, sem nenhum aviso.
+    - Esse reconhecimento agora se baseia na estrutura do próprio valor em graus-minutos-segundos seguida da letra do hemisfério (S/N/E/O/W), em vez de depender de uma frase fixa — reconhece qualquer redação que um memorial venha a usar, sem precisar de ajuste específico a cada novo modelo de documento.
+    - Reconhecimento de coordenadas em graus-minutos-segundos escritas por extenso ("8 GRAUS 37 MINUTOS 43,36 SEGUNDOS SUL"), em vez dos símbolos °/'/" — comum em memoriais mais antigos.
+    - Reconhecimento de memoriais em formato de poligonal descrita em prosa corrida, a partir de um marco com coordenada geográfica conhecida (ex.: "PARTINDO DO MARCO..., COM LATITUDE... E LONGITUDE..., COM AZIMUTE DE... E DISTANCIA DE...M,... CHEGA AO PONTO..."), comum em memoriais mais antigos do INCRA. Avisa especificamente quando falta o azimute de algum trecho no memorial original, em vez de arriscar uma poligonal incompleta.
+    - Reconhecimento de mais uma variação de poligonal em prosa, a partir de vértice com coordenada UTM conhecida, com cada segmento descrito como "com distância de...m e azimute de..., encontramos o vértice...".
+    - Botão "Anexar Imagem (Planta)": carrega uma foto/scan da planta (ou PDF contendo uma) num painel próprio de 600px que expande a janela para a direita, sem criar camada no QGIS. Aceita PDF com várias páginas, deixando escolher visualmente qual imagem usar. Zoom pela roda do mouse; pan pelo botão do meio (pressionar e arrastar), sem alterar o zoom nem marcar ponto nenhum.
+    - Botão "Desenhar Polígono na Planta": marca os vértices clicando diretamente sobre o desenho da planta, calibrando a partir de um único trecho já conhecido (2 cliques + azimute/distância reais, com 3 opções de coordenada) — o plugin calcula sozinho a rotação e a escala do desenho. Antes de informar o azimute/distância, os 2 marcadores de calibração podem ser arrastados para ajustar a posição exata (clique direito confirma e abre o formulário); os marcadores dos vértices seguintes também podem ser arrastados e excluídos com clique direito em cima deles. Clique direito numa área vazia finaliza o desenho. O formulário de azimute/distância não é mais modal — dá pra continuar dando zoom/pan na planta para conferir uma anotação (comum estar escrita no próprio desenho) enquanto o preenche.
+    - Suporte a datum diferente de SIRGAS2000 (ex.: SAD69, comum em memoriais anteriores a 2005) em coordenadas geográficas, tanto na extração de texto quanto na calibração da planta — antes eram sempre tratadas como já sendo SIRGAS2000, deslocando o polígono em documentos antigos. Se não detectado, assume SIRGAS2000 e já extrai/desenha o polígono; o combo "Datum" fica visível ao lado da tabela (inclusive depois de terminar de desenhar sobre a planta) e pode ser corrigido depois de ver o resultado no mapa — recalcula tudo na hora (tabela/área ou o desenho da planta inteiro), sem re-extrair nem clicar nos pontos de novo.
+    - Máscara de entrada em todos os campos de coordenada e azimute (Zoom Rápido nos 3 modos, e calibração da planta) — sinal sempre negativo e 2 dígitos de grau na coordenada (azimute usa 3, por ser ângulo de 0-360°), com exemplo com os graus de Brasília (em vez de zeros) na longitude/latitude, em cinza até digitar por cima.
+    - Corrigido o zoom da planta que só afastava (mouses/trackpads de rolagem de precisão não geravam o sinal esperado); roda do mouse agora dá zoom pra dentro e pra fora normalmente.
+    - Corrigido um bug sério na calibração: o "y" do painel da planta aumenta para baixo (imagem/tela), mas o cálculo tratava como se aumentasse para cima (mapa) — isso espelhava (Leste/Oeste) o polígono desenhado, girando o resultado numa orientação errada (ex.: imóvel alongado Norte-Sul na planta saía "deitado", alongado Leste-Oeste, no mapa).
+    - Identificação automática do Município/UF pela localização do imóvel (geocodificação reversa via OpenStreetMap), quando o memorial não informa isso no texto — mesma ideia do aplicativo oficial Coleta Rural. Precisa de internet; falha em silêncio se não conseguir.
+
+    Aba "Zoom Rápido":
+    - Agora com três opções de coordenada: Geográfica (GMS), Geográfica (decimal) e UTM. Os campos mostram um exemplo do formato esperado como texto cinza.
+
+    Aba "Gerar Memorial":
+    - Caixa "Informar Número do Processo SEI": desmarcada por padrão (memorial fica como já era). Ao marcar, habilita um campo com máscara SEI (00000.000000/0000-00) que, se preenchido, aparece como primeira linha do cabeçalho do PDF; ao desmarcar, o campo é limpo e a linha some.
+
+    Geral:
+    - Em todos os campos de texto editáveis (todas as abas), clicar num campo ainda vazio agora sempre leva o cursor para o começo — antes, campos com máscara (como o CIR) deixavam clicar no meio dos espaços em branco. Campos já preenchidos continuam normais.
+
+    1.2.0
+    Nova aba "Gerar Memorial":
+    - Gera o memorial descritivo em PDF (mesmo layout do app oficial Coleta Rural, com a logo do INCRA) a partir de um ou mais polígonos já selecionados numa camada do projeto — sem depender de texto ou PDF importado.
+    - Se mais de um polígono estiver selecionado, só gera se forem adjacentes (compartilharem uma borda de verdade, não só um vértice); nesse caso mescla num contorno externo único, mas o croqui continua desenhando os limites internos originais (linha tracejada) com uma etiqueta no centro de cada polígono (Matrícula, ou CIR quando não houver Matrícula). Se não forem adjacentes, nada é gerado, só um aviso.
+    - Reconhece automaticamente os campos de camadas públicas oficiais: SIGEF Brasil (codigo_imo, registro_m, nome_area, e os códigos IBGE de município/UF resolvidos para nome/sigla) e CAR/SICAR (NOM_MUNICI, COD_ESTADO). O memorial gerado cita a fonte do polígono (Certificado pelo SIGEF / Declarado no CAR / Indicado pela equipe do INCRA).
+    - Croqui com imagem de satélite de fundo (Esri World Imagery, com o devido crédito da fonte), mostrando só o(s) polígono(s) do imóvel de forma translúcida.
+    - Cabeçalho com link direto para o centro do imóvel no Google Maps.
+    - Lista de coordenadas organizada em até 4 colunas por página, continuando em página(s) extras quando necessário, sem nunca invadir o rodapé.
+    - Nome do arquivo sugerido automaticamente como memorial_informativo_<nome do imóvel>.pdf.
+
+    Aba "Memorial Coleta Rural" (fluxo original, inalterado):
+    - Campos "CIR" (com máscara) e "Matrícula" adicionados à tela, para preencher antes de salvar.
+
+    Aba "Memorial Manual" renomeada para "Memorial Genérico":
+    - Botão "Anexar KML/GeoJSON/SHP/DXF": lê o polígono do imóvel diretamente de um arquivo de geometria.
+    - Suporte ao datum WGS84 (além de SIRGAS2000 e SAD69).
+    - Aviso automático quando um vértice fica muito mais distante dos vizinhos do que o resto do perímetro (possível dígito perdido/trocado no memorial de origem).
+    - Campo CPF/CNPJ com formatação automática (alterna sozinho entre a máscara de CPF e CNPJ conforme a quantidade de dígitos).
+    - pypdf (leitura de PDF) embutido no plugin — não precisa mais instalar nada manualmente.
+    - Extração automática dos dados do imóvel e das coordenadas no texto do memorial (geográficas ou UTM, incluindo formatos rotulados de graus-minutos-segundos e UTM N/E, e tabelas de coordenadas em duas colunas separadas), com correção automática de ordem/sinal, tabela de conferência, e cálculo automático da área a partir das coordenadas.
+    - Detecção automática do fuso/datum informados no texto do memorial.
+    - Diversas correções de reconhecimento de texto vindo de OCR: separador de milhar brasileiro, cabeçalhos de tabela sem dois-pontos, rótulos colados sem espaço, travessão/hífen entre "fuso" e o número, tabela de coordenadas com muitas casas decimais, tabela lado a lado.
+
+    Nova aba "Zoom Rápido": digite uma coordenada geográfica ou UTM e centralize o mapa no local com um marcador temporário, sem criar camada nenhuma.
+
+    Geral:
+    - Tela principal reorganizada em abas, com a camada de destino e o botão "Gerir Camadas" sempre visíveis no topo. Janela redimensionada para caber os nomes de todas as abas sem cortar.
+    - Nova coluna "UF" na camada padrão, separada do Município.
+
+    1.1.0
+    - Adicionado botão "Incluir Camada Padrão" na tela de Configurações.
+    - Criação automática da camada padrão do Coleta Rural (Shapefile ou GeoPackage), já com os campos e o sistema de referência corretos.
+    - Escolha da pasta de destino da camada padrão, sugerindo automaticamente a pasta do projeto atual.
+    - Camada padrão criada já é adicionada ao projeto e marcada na lista de camadas permitidas.
+    - Camadas marcadas na lista de Configurações passam a ser exibidas em negrito.
+    - Corrigida a ordem dos campos da camada padrão (CPF/CNPJ antes de OBS e Área).
+
+    1.0.1
+    - Removidos blocos try/except/pass identificados pelos verificadores de segurança do repositório oficial do QGIS.
+    - Melhor tratamento de exceções durante remoção de preview, processamento de vértices e rollback de alterações.
+
     1.0.0
     - Primeira versão oficial do plugin Coleta Rural.
     - Importação automática de memoriais PDF.

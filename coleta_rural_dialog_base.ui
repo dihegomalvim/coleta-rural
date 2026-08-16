@@ -6,253 +6,1454 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>185</width>
-    <height>403</height>
+    <width>445</width>
+    <height>690</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Coleta Rural </string>
   </property>
-  <widget class="QLabel" name="Memorial">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>0</y>
-     <width>91</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Memorial PDF</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="labelcamadadedestino">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>60</y>
-     <width>101</width>
-     <height>21</height>
+     <y>8</y>
+     <width>150</width>
+     <height>14</height>
     </rect>
    </property>
    <property name="text">
     <string>Camada de destino</string>
    </property>
   </widget>
-  <widget class="QLabel" name="labelimovel">
+  <widget class="QComboBox" name="cmbCamada">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>140</y>
-     <width>47</width>
-     <height>13</height>
+     <y>24</y>
+     <width>270</width>
+     <height>22</height>
     </rect>
-   </property>
-   <property name="text">
-    <string>Imóvel</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="labelmunicipio">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>180</y>
-     <width>47</width>
-     <height>13</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Município</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="labeldeclarante">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>220</y>
-     <width>61</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Declarante</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="labelarea">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>260</y>
-     <width>31</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Área</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btnSelecionarPdf">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>30</y>
-     <width>101</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Selecionar PDF</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btnVisualizar">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>310</y>
-     <width>111</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Visualizar no Mapa</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btnSalvar">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>340</y>
-     <width>111</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Salvar na Camada</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btnConfiguracoes">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>370</y>
-     <width>91</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Configurações</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="cmbCamada">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>80</y>
-     <width>151</width>
+     <x>290</x>
+     <y>24</y>
+     <width>110</width>
      <height>22</height>
     </rect>
    </property>
+   <property name="text">
+    <string>Gerir Camadas</string>
+   </property>
   </widget>
-  <widget class="QLabel" name="lblImovel">
+  <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>160</y>
-     <width>151</width>
-     <height>16</height>
+     <y>54</y>
+     <width>425</width>
+     <height>626</height>
     </rect>
    </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
+   <property name="currentIndex">
+    <number>0</number>
    </property>
-   <property name="text">
-    <string>-</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="lblMunicipio">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>200</y>
-     <width>151</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>-</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="lblDeclarante">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>240</y>
-     <width>151</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>-</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="lblArea">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>280</y>
-     <width>151</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>-</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>110</y>
-     <width>121</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Informações do Memorial</string>
-   </property>
+   <widget class="QWidget" name="tabColetaRural">
+    <attribute name="title">
+     <string>Memorial Coleta Rural</string>
+    </attribute>
+    <widget class="QLabel" name="Memorial">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>150</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Memorial PDF</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnSelecionarPdf">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>36</y>
+       <width>140</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Selecionar PDF</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>72</y>
+       <width>200</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Informações do Memorial</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelimovel">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>96</y>
+       <width>60</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Imóvel</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblImovel">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>112</y>
+       <width>360</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>-</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelmunicipio">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>136</y>
+       <width>60</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Município</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblMunicipio">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>152</y>
+       <width>360</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>-</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labeldeclarante">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>176</y>
+       <width>70</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Declarante</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblDeclarante">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>194</y>
+       <width>360</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>-</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelarea">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>218</y>
+       <width>40</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Área</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblArea">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>236</y>
+       <width>360</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>-</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblCirColetaRuralTitulo">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>256</y>
+       <width>170</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CIR</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtCirColetaRural">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>270</y>
+       <width>170</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="inputMask">
+      <string notr="true">999.999.999.999-9;_</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblMatriculaColetaRuralTitulo">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>256</y>
+       <width>170</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Matrícula</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtMatriculaColetaRural">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>270</y>
+       <width>170</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnVisualizar">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>300</y>
+       <width>175</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Visualizar no Mapa</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnSalvar">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>195</x>
+       <y>300</y>
+       <width>175</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Salvar na Camada</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tabManual">
+    <attribute name="title">
+     <string>Memorial Genérico</string>
+    </attribute>
+    <widget class="QPushButton" name="btnSelecionarPdfManual">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>8</y>
+       <width>140</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Selecionar PDF</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnAnexarArquivoManual">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>8</y>
+       <width>210</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Anexar KML/GeoJSON/SHP/DXF</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblColarTextoManual">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>36</y>
+       <width>360</width>
+       <height>14</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Cole aqui o texto do memorial (após OCR):</string>
+     </property>
+    </widget>
+    <widget class="QPlainTextEdit" name="txtColarTexto">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>52</y>
+       <width>360</width>
+       <height>44</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnAnexarImagemManual">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>100</y>
+       <width>175</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Anexar Imagem (Planta)</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnDesenharPoligonoPlanta">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>195</x>
+       <y>100</y>
+       <width>175</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Desenhar Polígono na Planta</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnExtrairManual">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>128</y>
+       <width>195</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Extrair Dados do Texto</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnLimparManual">
+     <property name="geometry">
+      <rect>
+       <x>215</x>
+       <y>128</y>
+       <width>155</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Limpar</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblAvisoFormatoManual">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>153</y>
+       <width>360</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: #b00000;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="grpUtmManual">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>181</y>
+       <width>360</width>
+       <height>50</height>
+      </rect>
+     </property>
+     <property name="visible">
+      <bool>false</bool>
+     </property>
+     <property name="title">
+      <string>Coordenada UTM identificada — confirme o fuso</string>
+     </property>
+     <widget class="QLabel" name="lblFusoManual">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>35</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Fuso</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="cmbFusoManual">
+      <property name="geometry">
+       <rect>
+        <x>48</x>
+        <y>18</y>
+        <width>90</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>18S</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>19S</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>20S</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>21S</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>22S</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>23S</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>24S</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>25S</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="lblDatumManual">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>20</y>
+        <width>40</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Datum</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="cmbDatumManual">
+      <property name="geometry">
+       <rect>
+        <x>195</x>
+        <y>18</y>
+        <width>150</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>SIRGAS2000</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>SAD69</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>WGS84</string>
+       </property>
+      </item>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="lblCoordenadasManualTitulo">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>233</y>
+       <width>300</width>
+       <height>14</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Coordenadas identificadas (Longitude, Latitude)</string>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="tabelaCoordenadasManual">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>249</y>
+       <width>360</width>
+       <height>110</height>
+      </rect>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::NoSelection</enum>
+     </property>
+     <column>
+      <property name="text">
+       <string>Vértice</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Longitude</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Latitude</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QLabel" name="lblDadosImovelManual">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>361</y>
+       <width>360</width>
+       <height>14</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Dados do imóvel (edite se necessário)</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblImovelManualTitulo">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>377</y>
+       <width>60</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Imóvel</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtImovelManual">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>391</y>
+       <width>360</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblCirManualTitulo">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>413</y>
+       <width>170</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CIR</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtCirManual">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>427</y>
+       <width>170</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="inputMask">
+      <string notr="true">999.999.999.999-9;_</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblMatriculaManualTitulo">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>413</y>
+       <width>170</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Matrícula</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtMatriculaManual">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>427</y>
+       <width>170</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblMunicipioManualTitulo">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>449</y>
+       <width>60</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Município</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtMunicipioManual">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>463</y>
+       <width>280</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblUfManualTitulo">
+     <property name="geometry">
+      <rect>
+       <x>300</x>
+       <y>449</y>
+       <width>70</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>UF</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtUfManual">
+     <property name="geometry">
+      <rect>
+       <x>300</x>
+       <y>463</y>
+       <width>70</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="maxLength">
+      <number>2</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblDeclaranteManualTitulo">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>485</y>
+       <width>60</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Declarante</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtDeclaranteManual">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>499</y>
+       <width>360</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblCpfManualTitulo">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>521</y>
+       <width>175</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CPF/CNPJ (formata automaticamente)</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtCpfManual">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>535</y>
+       <width>175</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="maxLength">
+      <number>18</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblAreaManualTitulo">
+     <property name="geometry">
+      <rect>
+       <x>195</x>
+       <y>521</y>
+       <width>175</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Área (ha) — calculada automaticamente</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtAreaManual">
+     <property name="geometry">
+      <rect>
+       <x>195</x>
+       <y>535</y>
+       <width>175</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnVisualizarManual">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>561</y>
+       <width>175</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Visualizar no Mapa</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnSalvarManual">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>195</x>
+       <y>561</y>
+       <width>175</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Salvar na Camada</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tabZoom">
+    <attribute name="title">
+     <string>Zoom Rápido</string>
+    </attribute>
+    <widget class="QLabel" name="lblInstrucaoZoom">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>360</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Escolha o tipo de coordenada, preencha os dois campos e clique em Visualizar Localização. Nenhuma camada é criada.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rdoZoomGeografica">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>44</y>
+       <width>175</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Geográfica (GMS)</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rdoZoomGeograficaDecimal">
+     <property name="geometry">
+      <rect>
+       <x>195</x>
+       <y>44</y>
+       <width>175</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Geográfica (decimal)</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rdoZoomUtm">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>64</y>
+       <width>175</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>UTM (plana)</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblZoomCoord1">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>90</y>
+       <width>175</width>
+       <height>14</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Longitude</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtZoomCoord1">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>106</y>
+       <width>175</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblZoomCoord2">
+     <property name="geometry">
+      <rect>
+       <x>195</x>
+       <y>90</y>
+       <width>175</width>
+       <height>14</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Latitude</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtZoomCoord2">
+     <property name="geometry">
+      <rect>
+       <x>195</x>
+       <y>106</y>
+       <width>175</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="grpUtmZoom">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>134</y>
+       <width>360</width>
+       <height>55</height>
+      </rect>
+     </property>
+     <property name="visible">
+      <bool>false</bool>
+     </property>
+     <property name="title">
+      <string>Fuso e datum da coordenada UTM</string>
+     </property>
+     <widget class="QLabel" name="lblFusoZoom">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>22</y>
+        <width>35</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Fuso</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="cmbFusoZoom">
+      <property name="geometry">
+       <rect>
+        <x>48</x>
+        <y>20</y>
+        <width>90</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>18S</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>19S</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>20S</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>21S</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>22S</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>23S</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>24S</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>25S</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="lblDatumZoom">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>22</y>
+        <width>40</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Datum</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="cmbDatumZoom">
+      <property name="geometry">
+       <rect>
+        <x>195</x>
+        <y>20</y>
+        <width>150</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>SIRGAS2000</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>SAD69</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>WGS84</string>
+       </property>
+      </item>
+     </widget>
+    </widget>
+    <widget class="QPushButton" name="btnVisualizarLocal">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>199</y>
+       <width>170</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Visualizar Localização</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tabMemorialSelecao">
+    <attribute name="title">
+     <string>Gerar Memorial</string>
+    </attribute>
+    <widget class="QLabel" name="lblOrigemSelecaoTitulo">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>360</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Camada de origem (selecione o(s) polígono(s) nela antes de carregar)</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cmbCamadaOrigemSelecao">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>26</y>
+       <width>240</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnCarregarSelecao">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>26</y>
+       <width>110</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Carregar Seleção</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblAvisoSelecao">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>54</y>
+       <width>360</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="tabelaCoordenadasSelecao">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>86</y>
+       <width>360</width>
+       <height>110</height>
+      </rect>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::NoSelection</enum>
+     </property>
+     <column>
+      <property name="text">
+       <string>Vértice</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Longitude</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Latitude</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QLabel" name="lblDadosImovelSelecao">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>208</y>
+       <width>360</width>
+       <height>14</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Dados do imóvel (edite se necessário)</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblImovelSelecaoTitulo">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>224</y>
+       <width>60</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Imóvel</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtImovelSelecao">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>238</y>
+       <width>360</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="chkProcessoSeiSelecao">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>262</y>
+       <width>300</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Informar Número do Processo SEI</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtProcessoSeiSelecao">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>280</y>
+       <width>170</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="inputMask">
+      <string notr="true">99999.999999/9999-99;_</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblCirSelecaoTitulo">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>300</y>
+       <width>170</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CIR</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtCirSelecao">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>314</y>
+       <width>170</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="inputMask">
+      <string notr="true">999.999.999.999-9;_</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblMatriculaSelecaoTitulo">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>300</y>
+       <width>170</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Matrícula</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtMatriculaSelecao">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>314</y>
+       <width>170</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblMunicipioSelecaoTitulo">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>336</y>
+       <width>60</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Município</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtMunicipioSelecao">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>350</y>
+       <width>280</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblUfSelecaoTitulo">
+     <property name="geometry">
+      <rect>
+       <x>300</x>
+       <y>336</y>
+       <width>70</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>UF</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtUfSelecao">
+     <property name="geometry">
+      <rect>
+       <x>300</x>
+       <y>350</y>
+       <width>70</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="maxLength">
+      <number>2</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblDeclaranteSelecaoTitulo">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>372</y>
+       <width>60</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Declarante</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtDeclaranteSelecao">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>386</y>
+       <width>360</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblCpfSelecaoTitulo">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>408</y>
+       <width>175</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CPF/CNPJ (formata automaticamente)</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtCpfSelecao">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>422</y>
+       <width>175</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="maxLength">
+      <number>18</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblAreaSelecaoTitulo">
+     <property name="geometry">
+      <rect>
+       <x>195</x>
+       <y>408</y>
+       <width>175</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Área (ha) — calculada automaticamente</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtAreaSelecao">
+     <property name="geometry">
+      <rect>
+       <x>195</x>
+       <y>422</y>
+       <width>175</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnVisualizarSelecao">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>448</y>
+       <width>175</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Visualizar no Mapa</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnGerarMemorialSelecao">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>195</x>
+       <y>448</y>
+       <width>175</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Gerar Memorial PDF</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnLimparSelecao">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>476</y>
+       <width>175</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Limpar</string>
+     </property>
+    </widget>
+   </widget>
   </widget>
  </widget>
  <resources/>
