@@ -77,19 +77,19 @@ _ALTURA_LINHA_COORD = 5.0
 
 
 def _mm(valor):
-    return QgsLayoutMeasurement(valor, QgsUnitTypes.LayoutMillimeters)
+    return QgsLayoutMeasurement(valor, QgsUnitTypes.LayoutUnit.LayoutMillimeters)
 
 
 def _posicionar(item, x, y, largura, altura, pagina=0):
 
     item.attemptMove(
-        QgsLayoutPoint(x, y, QgsUnitTypes.LayoutMillimeters),
+        QgsLayoutPoint(x, y, QgsUnitTypes.LayoutUnit.LayoutMillimeters),
         True,
         False,
         pagina
     )
     item.attemptResize(
-        QgsLayoutSize(largura, altura, QgsUnitTypes.LayoutMillimeters)
+        QgsLayoutSize(largura, altura, QgsUnitTypes.LayoutUnit.LayoutMillimeters)
     )
 
 
@@ -127,14 +127,14 @@ def _formato_com_buffer(tamanho_pt, negrito=False):
     formato = QgsTextFormat()
     formato.setFont(fonte)
     formato.setSize(tamanho_pt)
-    formato.setSizeUnit(QgsUnitTypes.RenderPoints)
+    formato.setSizeUnit(QgsUnitTypes.RenderUnit.RenderPoints)
     formato.setColor(QColor(0, 0, 0))
 
     buffer_config = QgsTextBufferSettings()
     buffer_config.setEnabled(True)
     buffer_config.setColor(QColor(255, 255, 255))
     buffer_config.setSize(0.8)
-    buffer_config.setSizeUnit(QgsUnitTypes.RenderMillimeters)
+    buffer_config.setSizeUnit(QgsUnitTypes.RenderUnit.RenderMillimeters)
     formato.setBuffer(buffer_config)
 
     return formato
@@ -217,7 +217,7 @@ def _adicionar_rodape(layout, pagina, y_rodape_local):
     o aviso apareça em todas elas."""
 
     friso_rodape = QgsLayoutItemShape(layout)
-    friso_rodape.setShapeType(QgsLayoutItemShape.Rectangle)
+    friso_rodape.setShapeType(QgsLayoutItemShape.Shape.Rectangle)
     layout.addLayoutItem(friso_rodape)
     _posicionar(
         friso_rodape, 0, y_rodape_local, _LARGURA_PAGINA, _ALTURA_RODAPE, pagina
@@ -230,8 +230,8 @@ def _adicionar_rodape(layout, pagina, y_rodape_local):
     fonte_rodape.setPointSize(7)
     texto_rodape.setFont(fonte_rodape)
     texto_rodape.setFontColor(QColor(255, 255, 255))
-    texto_rodape.setHAlign(Qt.AlignCenter)
-    texto_rodape.setVAlign(Qt.AlignVCenter)
+    texto_rodape.setHAlign(Qt.AlignmentFlag.AlignCenter)
+    texto_rodape.setVAlign(Qt.AlignmentFlag.AlignVCenter)
     layout.addLayoutItem(texto_rodape)
     _posicionar(
         texto_rodape,
@@ -277,7 +277,7 @@ def gerar_pdf_memorial(
 
     pagina = layout.pageCollection().page(0)
     pagina.setPageSize(
-        QgsLayoutSize(_LARGURA_PAGINA, _ALTURA_PAGINA, QgsUnitTypes.LayoutMillimeters)
+        QgsLayoutSize(_LARGURA_PAGINA, _ALTURA_PAGINA, QgsUnitTypes.LayoutUnit.LayoutMillimeters)
     )
 
     y = _MARGEM
@@ -296,15 +296,15 @@ def gerar_pdf_memorial(
     fonte_titulo.setPointSize(18)
     fonte_titulo.setBold(True)
     titulo.setFont(fonte_titulo)
-    titulo.setHAlign(Qt.AlignRight)
-    titulo.setVAlign(Qt.AlignVCenter)
+    titulo.setHAlign(Qt.AlignmentFlag.AlignRight)
+    titulo.setVAlign(Qt.AlignmentFlag.AlignVCenter)
     layout.addLayoutItem(titulo)
     _posicionar(titulo, _MARGEM + 55, y, _LARGURA_UTIL - 55, 16)
 
     y += 20
 
     friso_cabecalho = QgsLayoutItemShape(layout)
-    friso_cabecalho.setShapeType(QgsLayoutItemShape.Rectangle)
+    friso_cabecalho.setShapeType(QgsLayoutItemShape.Shape.Rectangle)
     layout.addLayoutItem(friso_cabecalho)
     _posicionar(friso_cabecalho, 0, y, _LARGURA_PAGINA, 2)
     _estilizar_retangulo(friso_cabecalho, _VERDE_INCRA)
@@ -367,7 +367,7 @@ def gerar_pdf_memorial(
     html_info += "</table>"
 
     caixa_info = QgsLayoutItemLabel(layout)
-    caixa_info.setMode(QgsLayoutItemLabel.ModeHtml)
+    caixa_info.setMode(QgsLayoutItemLabel.Mode.ModeHtml)
     caixa_info.setText(html_info)
     caixa_info.setFrameEnabled(True)
     # afasta o texto das bordas do quadro (por padrão fica colado)
@@ -406,7 +406,7 @@ def gerar_pdf_memorial(
 
     rotulo_norte = QgsLayoutItemLabel(layout)
     rotulo_norte.setText("N")
-    rotulo_norte.setHAlign(Qt.AlignCenter)
+    rotulo_norte.setHAlign(Qt.AlignmentFlag.AlignCenter)
     rotulo_norte.setTextFormat(_formato_com_buffer(8, negrito=True))
     layout.addLayoutItem(rotulo_norte)
     _posicionar(rotulo_norte, _MARGEM + _LARGURA_UTIL - 15, y_topo_mapa + 2, 10, 5)
@@ -427,7 +427,7 @@ def gerar_pdf_memorial(
     legenda_crs = QgsLayoutItemLabel(layout)
     legenda_crs.setText(f"Datum: {_nome_amigavel_crs(crs_mapa)}")
     legenda_crs.setFont(fonte_legenda)
-    legenda_crs.setHAlign(Qt.AlignLeft)
+    legenda_crs.setHAlign(Qt.AlignmentFlag.AlignLeft)
     layout.addLayoutItem(legenda_crs)
     _posicionar(legenda_crs, _MARGEM, y, 80, 5)
 
@@ -436,7 +436,7 @@ def gerar_pdf_memorial(
         legenda_credito = QgsLayoutItemLabel(layout)
         legenda_credito.setText(_CREDITO_SATELITE)
         legenda_credito.setFont(fonte_legenda)
-        legenda_credito.setHAlign(Qt.AlignRight)
+        legenda_credito.setHAlign(Qt.AlignmentFlag.AlignRight)
         layout.addLayoutItem(legenda_credito)
         _posicionar(
             legenda_credito,
@@ -503,7 +503,7 @@ def gerar_pdf_memorial(
             texto_coluna = "<br/>".join(sub)
 
             caixa_coord = QgsLayoutItemLabel(layout)
-            caixa_coord.setMode(QgsLayoutItemLabel.ModeHtml)
+            caixa_coord.setMode(QgsLayoutItemLabel.Mode.ModeHtml)
             caixa_coord.setText(
                 "<div style='font-family:Consolas,monospace; font-size:8pt;'>"
                 + texto_coluna
@@ -528,5 +528,5 @@ def gerar_pdf_memorial(
 
     resultado = exportador.exportToPdf(caminho_saida, configuracoes)
 
-    if resultado != QgsLayoutExporter.Success:
+    if resultado != QgsLayoutExporter.ExportResult.Success:
         raise Exception(f"Falha ao exportar o PDF (código {resultado}).")

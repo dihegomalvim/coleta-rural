@@ -8,7 +8,7 @@ qgisMinimumVersion=3.28
 
 description=Imports Coleta Rural PDF survey reports and other memorial descritivo formats (any Brazilian state), automatically creating polygon features in QGIS vector layers — and generates memorial descritivo PDF reports from selected polygons, recognizing SIGEF/CAR public layers.
 
-version=1.2.1
+version=1.2.2
 
 author=Dihêgo Augusto Gomes Malvim de Barros - INCRA Pernambuco
 
@@ -39,7 +39,7 @@ deprecated=False
 server=False
 
 changelog=
-    1.2.1
+    1.2.2
     Aba "Memorial Genérico":
     - Reconhecimento de memoriais descritivos em formato de poligonal (azimute e distância entre vértices, a partir de um vértice inicial com coordenada UTM conhecida), formato topográfico tradicional comum em memoriais mais antigos.
     - Reconhecimento também do mesmo formato de poligonal quando descrito por rumo (quadrante + ângulo, ex.: "NE 45°30'20"") em vez de azimute em graus decimais.
@@ -58,6 +58,7 @@ changelog=
     - Máscara de entrada em todos os campos de coordenada e azimute (Zoom Rápido nos 3 modos, e calibração da planta) — sinal sempre negativo e 2 dígitos de grau na coordenada (azimute usa 3, por ser ângulo de 0-360°), com exemplo com os graus de Brasília (em vez de zeros) na longitude/latitude, em cinza até digitar por cima.
     - Corrigido o zoom da planta que só afastava (mouses/trackpads de rolagem de precisão não geravam o sinal esperado); roda do mouse agora dá zoom pra dentro e pra fora normalmente.
     - Corrigido um bug sério na calibração: o "y" do painel da planta aumenta para baixo (imagem/tela), mas o cálculo tratava como se aumentasse para cima (mapa) — isso espelhava (Leste/Oeste) o polígono desenhado, girando o resultado numa orientação errada (ex.: imóvel alongado Norte-Sul na planta saía "deitado", alongado Leste-Oeste, no mapa).
+    - Corrigidas todas as enumerações do Qt/QGIS usadas na forma curta (ex.: Qt.AlignCenter, QDialog.Accepted) para a forma totalmente qualificada exigida pelo Qt6 (ex.: Qt.AlignmentFlag.AlignCenter), e .exec_() trocado por .exec() — exigência do verificador automático do repositório de plugins do QGIS, sem mudar nenhum comportamento visível.
     - Identificação automática do Município/UF pela localização do imóvel (geocodificação reversa via OpenStreetMap), quando o memorial não informa isso no texto — mesma ideia do aplicativo oficial Coleta Rural. Precisa de internet; falha em silêncio se não conseguir.
 
     Aba "Zoom Rápido":

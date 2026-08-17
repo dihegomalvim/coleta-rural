@@ -1,6 +1,6 @@
 # Coleta Rural
 
-## Versão 1.2.1
+## Versão 1.2.2
 
 Plugin QGIS para importação automática de memoriais descritivos (do sistema Coleta Rural ou de outras origens), com criação e gravação de polígonos diretamente em camadas vetoriais previamente configuradas — e geração de memoriais descritivos em PDF a partir de polígonos já selecionados no projeto.
 

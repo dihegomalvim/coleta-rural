@@ -187,11 +187,14 @@ class _VisualizadorPlanta(QtWidgets.QGraphicsView):
         self._cena = QtWidgets.QGraphicsScene(self)
         self.setScene(self._cena)
         self.setRenderHints(
-            QtGui.QPainter.Antialiasing | QtGui.QPainter.SmoothPixmapTransform
+            QtGui.QPainter.RenderHint.Antialiasing
+            | QtGui.QPainter.RenderHint.SmoothPixmapTransform
         )
-        self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
-        self.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+        self.setDragMode(QtWidgets.QGraphicsView.DragMode.NoDrag)
+        self.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
+        self.setTransformationAnchor(
+            QtWidgets.QGraphicsView.ViewportAnchor.AnchorUnderMouse
+        )
 
         self._item_pixmap = None
         self._marcadores = []
@@ -221,7 +224,7 @@ class _VisualizadorPlanta(QtWidgets.QGraphicsView):
 
         self._item_pixmap = self._cena.addPixmap(pixmap)
         self._cena.setSceneRect(self._item_pixmap.boundingRect())
-        self.fitInView(self._item_pixmap, QtCore.Qt.KeepAspectRatio)
+        self.fitInView(self._item_pixmap, QtCore.Qt.AspectRatioMode.KeepAspectRatio)
 
     def ajustar_zoom_para_caber(self):
         """Ajusta o zoom para mostrar a imagem inteira, ocupando o
@@ -234,7 +237,7 @@ class _VisualizadorPlanta(QtWidgets.QGraphicsView):
         manual que a pessoa já tivesse feito."""
 
         if self._item_pixmap is not None:
-            self.fitInView(self._item_pixmap, QtCore.Qt.KeepAspectRatio)
+            self.fitInView(self._item_pixmap, QtCore.Qt.AspectRatioMode.KeepAspectRatio)
 
     def adicionar_marcador(self, ponto, removivel=False, arrastavel=None):
         """Marca um ponto clicado na planta com um círculo vermelho —
@@ -263,7 +266,7 @@ class _VisualizadorPlanta(QtWidgets.QGraphicsView):
         )
 
         if arrastavel:
-            item.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
+            item.setFlag(QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
 
         if removivel:
             self._marcadores_removiveis.append(item)
@@ -300,7 +303,7 @@ class _VisualizadorPlanta(QtWidgets.QGraphicsView):
         if self._item_pixmap is None:
             return
 
-        if evento.button() == QtCore.Qt.MiddleButton:
+        if evento.button() == QtCore.Qt.MouseButton.MiddleButton:
             # pan com o botão do meio — não conflita com o esquerdo
             # (marca vértice) nem o direito (confirma/exclui/finaliza),
             # então funciona em qualquer modo, inclusive com o
@@ -308,16 +311,16 @@ class _VisualizadorPlanta(QtWidgets.QGraphicsView):
             # dar uma olhada no resto da planta sem perder a calibração
             self._arrastando_pan = True
             self._pan_ultima_pos = evento.pos()
-            self.setCursor(QtCore.Qt.ClosedHandCursor)
+            self.setCursor(QtCore.Qt.CursorShape.ClosedHandCursor)
             return
 
         item_clicado = self.itemAt(evento.pos())
         eh_marcador_removivel = item_clicado in self._marcadores_removiveis
         eh_marcador_arrastavel = item_clicado is not None and bool(
-            item_clicado.flags() & QtWidgets.QGraphicsItem.ItemIsMovable
+            item_clicado.flags() & QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsMovable
         )
 
-        if evento.button() == QtCore.Qt.RightButton:
+        if evento.button() == QtCore.Qt.MouseButton.RightButton:
 
             if eh_marcador_removivel:
                 self._marcadores_removiveis.remove(item_clicado)
@@ -326,7 +329,7 @@ class _VisualizadorPlanta(QtWidgets.QGraphicsView):
             else:
                 self.clicado_direito.emit()
 
-        elif evento.button() == QtCore.Qt.LeftButton:
+        elif evento.button() == QtCore.Qt.MouseButton.LeftButton:
 
             if eh_marcador_arrastavel:
                 # deixa o Qt cuidar do arrasto (ItemIsMovable) em vez
@@ -358,7 +361,7 @@ class _VisualizadorPlanta(QtWidgets.QGraphicsView):
 
     def mouseReleaseEvent(self, evento):
 
-        if evento.button() == QtCore.Qt.MiddleButton and self._arrastando_pan:
+        if evento.button() == QtCore.Qt.MouseButton.MiddleButton and self._arrastando_pan:
             self._arrastando_pan = False
             self.unsetCursor()
             return
@@ -367,7 +370,7 @@ class _VisualizadorPlanta(QtWidgets.QGraphicsView):
 
     def keyPressEvent(self, evento):
 
-        if evento.key() == QtCore.Qt.Key_Escape:
+        if evento.key() == QtCore.Qt.Key.Key_Escape:
             self.cancelado.emit()
         else:
             super().keyPressEvent(evento)
@@ -544,7 +547,9 @@ class _DialogoEscolherImagemPdf(QtWidgets.QDialog):
             botao.setIcon(QtGui.QIcon(pixmap))
             botao.setIconSize(QtCore.QSize(150, 150))
             botao.setText(f"Página {indice_pagina + 1}")
-            botao.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+            botao.setToolButtonStyle(
+                QtCore.Qt.ToolButtonStyle.ToolButtonTextUnderIcon
+            )
             botao.clicked.connect(
                 lambda _checked=False, i=indice_pagina: self._escolher(i)
             )
@@ -1124,7 +1129,7 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
         dlg = ConfiguracoesDialog(self)
 
-        if dlg.exec_():
+        if dlg.exec():
 
             self.carregar_camadas_permitidas()
 
@@ -1367,7 +1372,7 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
         tipo = geom.type()
 
-        if tipo == QgsWkbTypes.PolygonGeometry:
+        if tipo == QgsWkbTypes.GeometryType.PolygonGeometry:
 
             if geom.isMultipart():
 
@@ -1382,7 +1387,7 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
             return poligono[0] if poligono else None
 
-        if tipo == QgsWkbTypes.LineGeometry:
+        if tipo == QgsWkbTypes.GeometryType.LineGeometry:
 
             if geom.isMultipart():
 
@@ -1502,7 +1507,7 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
                 dialogo = _DialogoEscolherImagemPdf(imagens, self)
 
-                if dialogo.exec_() != QtWidgets.QDialog.Accepted:
+                if dialogo.exec() != QtWidgets.QDialog.DialogCode.Accepted:
                     return
 
                 pixmap_escolhido = next(
@@ -1686,7 +1691,7 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
         self._dialogo_calibracao_planta = None
 
-        if resultado != QtWidgets.QDialog.Accepted:
+        if resultado != QtWidgets.QDialog.DialogCode.Accepted:
             return
 
         try:
@@ -2646,7 +2651,7 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
         requisicao = urllib.request.Request(
             url,
-            headers={"User-Agent": "ColetaRural-QGIS-Plugin/1.2.1"}
+            headers={"User-Agent": "ColetaRural-QGIS-Plugin/1.2.2"}
         )
 
         try:
@@ -3261,7 +3266,7 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
         self.zoom_marker.setCenter(ponto)
         self.zoom_marker.setColor(QtGui.QColor(255, 0, 0))
-        self.zoom_marker.setIconType(QgsVertexMarker.ICON_CROSS)
+        self.zoom_marker.setIconType(QgsVertexMarker.IconType.ICON_CROSS)
         self.zoom_marker.setIconSize(14)
         self.zoom_marker.setPenWidth(3)
 
@@ -3286,7 +3291,7 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
             if (
                 isinstance(camada, QgsVectorLayer)
                 and QgsWkbTypes.geometryType(camada.wkbType())
-                == QgsWkbTypes.PolygonGeometry
+                == QgsWkbTypes.GeometryType.PolygonGeometry
             ):
                 self.cmbCamadaOrigemSelecao.addItem(camada.name(), camada.id())
 
@@ -3618,7 +3623,7 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
             feicao = QgsFeature()
             feicao.setGeometry(
-                geometria.convertToType(QgsWkbTypes.LineGeometry, False)
+                geometria.convertToType(QgsWkbTypes.GeometryType.LineGeometry, False)
             )
             provider.addFeature(feicao)
 
@@ -3626,7 +3631,7 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
         simbolo = camada_linhas.renderer().symbol()
         camada_simbolo = simbolo.symbolLayer(0)
-        camada_simbolo.setPenStyle(QtCore.Qt.DashLine)
+        camada_simbolo.setPenStyle(QtCore.Qt.PenStyle.DashLine)
         camada_simbolo.setColor(QtGui.QColor(80, 80, 80))
         camada_simbolo.setWidth(0.5)
 

@@ -6,7 +6,7 @@ O formato segue o padrão de versionamento semântico (Semantic Versioning).
 
 ---
 
-## [1.2.1] - 2026-08-12
+## [1.2.2] - 2026-08-17
 
 ### Adicionado
 
@@ -31,6 +31,7 @@ O formato segue o padrão de versionamento semântico (Semantic Versioning).
 - Aviso claro na aba "Memorial Coleta Rural" quando o PDF selecionado não tem texto extraível (comum em memoriais antigos digitalizados) — antes os campos simplesmente ficavam em branco sem nenhuma explicação; agora avisa que é preciso fazer OCR externamente e colar o texto na aba "Memorial Genérico".
 - Corrigido um bug sério de reconhecimento de coordenadas na aba "Memorial Genérico": memoriais que descrevem cada vértice em prosa corrida, com a coordenada em graus-minutos-segundos seguida da letra do hemisfério (ex.: "de coordenadas -8°11'09,909" S e -35°46'12,804" W"), em vez de um rótulo explícito "Longitude:"/"Latitude:" — comum em memoriais SIGEF/INCRA que também trazem azimute e distância até o próximo vértice —, não eram reconhecidos por nenhum formato específico e caíam no reconhecimento genérico de texto livre, que confundia fragmentos do próprio valor em graus-minutos-segundos (os segundos de uma coordenada) com uma coordenada inteira. Isso produzia uma área e um polígono completamente errados, sem nenhum aviso ao usuário.
 - Corrigido um bug sério na calibração do "Desenhar Polígono na Planta": o cálculo tratava o "y" do painel da planta como se aumentasse para cima (como um mapa de verdade), quando na verdade aumenta para baixo (convenção padrão de imagem/tela, já que o painel é um `QGraphicsScene` mostrando a planta escaneada). Isso acertava por acidente o próprio trecho usado na calibração, mas espelhava (Leste↔Oeste) todo o resto do polígono desenhado, girando o resultado numa orientação errada — por exemplo, um imóvel alongado de Norte a Sul na planta original aparecia "deitado" (alongado de Leste a Oeste) quando desenhado sobre o mapa/satélite.
+- Corrigido todo o uso de enumerações do Qt/QGIS que o QGIS ainda aceitava na forma "curta" (ex.: `Qt.AlignCenter`, `QDialog.Accepted`, `QgsWkbTypes.PolygonGeometry`) para a forma totalmente qualificada exigida pelo Qt6 (ex.: `Qt.AlignmentFlag.AlignCenter`, `QDialog.DialogCode.Accepted`, `QgsWkbTypes.GeometryType.PolygonGeometry`), e trocado `.exec_()` por `.exec()` nos dois diálogos que ainda usavam o nome antigo — sem isso, o verificador automático do repositório de plugins do QGIS rejeitava a submissão por incompatibilidade com Qt6. Não muda nenhum comportamento visível: só deixa o plugin pronto para quando o QGIS migrar de Qt5 para Qt6.
 
 ### Melhorado
 
@@ -212,4 +213,4 @@ Coleta Rural
 
 **Versão atual**
 
-1.2.1
+1.2.2

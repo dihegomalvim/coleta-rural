@@ -61,7 +61,7 @@ class ConfiguracoesDialog(QtWidgets.QDialog, FORM_CLASS):
         fonte = item.font()
 
         fonte.setBold(
-            item.checkState() == Qt.Checked
+            item.checkState() == Qt.CheckState.Checked
         )
 
         item.setFont(fonte)
@@ -87,19 +87,19 @@ class ConfiguracoesDialog(QtWidgets.QDialog, FORM_CLASS):
             )
 
             item.setFlags(
-                item.flags() | Qt.ItemIsUserCheckable
+                item.flags() | Qt.ItemFlag.ItemIsUserCheckable
             )
 
             if layer.name() in camadas_salvas:
 
                 item.setCheckState(
-                    Qt.Checked
+                    Qt.CheckState.Checked
                 )
 
             else:
 
                 item.setCheckState(
-                    Qt.Unchecked
+                    Qt.CheckState.Unchecked
                 )
 
             self.atualizar_estilo_item(item)
@@ -117,7 +117,7 @@ class ConfiguracoesDialog(QtWidgets.QDialog, FORM_CLASS):
 
         pasta = os.path.join(
             QStandardPaths.writableLocation(
-                QStandardPaths.DocumentsLocation
+                QStandardPaths.StandardLocation.DocumentsLocation
             ),
             "Coleta Rural"
         )
@@ -207,7 +207,7 @@ class ConfiguracoesDialog(QtWidgets.QDialog, FORM_CLASS):
         erro = resultado[0]
         mensagem = resultado[1] if len(resultado) > 1 else ""
 
-        if erro != QgsVectorFileWriter.NoError:
+        if erro != QgsVectorFileWriter.WriterError.NoError:
 
             QMessageBox.critical(
                 self,
@@ -369,7 +369,7 @@ class ConfiguracoesDialog(QtWidgets.QDialog, FORM_CLASS):
             if item.text() == nome:
 
                 item.setCheckState(
-                    Qt.Checked
+                    Qt.CheckState.Checked
                 )
 
                 break
@@ -382,7 +382,7 @@ class ConfiguracoesDialog(QtWidgets.QDialog, FORM_CLASS):
 
             item = self.lstCamadas.item(i)
 
-            if item.checkState() == Qt.Checked:
+            if item.checkState() == Qt.CheckState.Checked:
 
                 camadas_selecionadas.append(
                     item.text()

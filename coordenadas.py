@@ -1448,7 +1448,7 @@ def poligonos_conectados(geometrias):
     # fronteira (contorno) do polígono é obtida convertendo a geometria
     # para linha, que segue todos os anéis (externo e furos)
     fronteiras = [
-        geometria.convertToType(QgsWkbTypes.LineGeometry, False)
+        geometria.convertToType(QgsWkbTypes.GeometryType.LineGeometry, False)
         for geometria in geometrias
     ]
 

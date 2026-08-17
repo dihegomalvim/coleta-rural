@@ -1,6 +1,6 @@
 Coleta Rural
-Versão: 1.2.1
-Data: 14/08/2026
+Versão: 1.2.2
+Data: 17/08/2026
 
 Desenvolvedor:
 Dihêgo Augusto Gomes Malvim de Barros
