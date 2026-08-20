@@ -290,6 +290,17 @@ class _VisualizadorPlanta(QtWidgets.QGraphicsView):
 
         return [self.posicao_marcador(item) for item in self._marcadores_removiveis]
 
+    def limpar_imagem(self):
+        """Remove a imagem carregada e todos os marcadores, voltando o
+        painel ao estado inicial (sem imagem nenhuma) — usado pelo
+        botão "Limpar Imagem" para desfazer o que "Anexar Imagem
+        (Planta)" fez."""
+
+        self._cena.clear()
+        self._item_pixmap = None
+        self._marcadores = []
+        self._marcadores_removiveis = []
+
     def limpar_marcadores(self):
 
         for item in self._marcadores:
@@ -682,6 +693,20 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
             self._largura_padrao_janela + 10, 54, _largura_painel_planta, 626
         )
         self.painelPlanta.setVisible(False)
+
+        # botão para desfazer o "Anexar Imagem (Planta)" — some junto
+        # com o painel (fecha o painel e volta a janela ao tamanho
+        # padrão), então fica escondido/mostrado do mesmo jeito que o
+        # painel, em vez de ocupar espaço fixo na aba mesmo sem imagem
+        # nenhuma anexada
+        self.btnLimparImagemPlanta = QtWidgets.QPushButton(
+            "Limpar Imagem", self
+        )
+        self.btnLimparImagemPlanta.setGeometry(
+            self._largura_padrao_janela + 10, 28, 130, 22
+        )
+        self.btnLimparImagemPlanta.setVisible(False)
+        self.btnLimparImagemPlanta.clicked.connect(self.limpar_imagem_planta)
 
         self.painelPlanta.clicado.connect(self._ao_clicar_planta)
         self.painelPlanta.clicado_direito.connect(
@@ -1529,6 +1554,7 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
         self.resize(self._largura_com_painel_planta, self.height())
         self.painelPlanta.setVisible(True)
+        self.btnLimparImagemPlanta.setVisible(True)
 
         # o encaixe feito dentro de carregar_pixmap() aconteceu com o
         # painel ainda no tamanho antigo (a janela só expandiu agora,
@@ -1550,6 +1576,30 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
             "para marcar os vértices diretamente sobre o desenho, "
             "calibrando a partir de um trecho já conhecido do memorial."
         )
+
+    def limpar_imagem_planta(self):
+        """Desfaz o que "Anexar Imagem (Planta)" fez: remove a imagem
+        e os marcadores, esconde o painel e o próprio botão "Limpar
+        Imagem", e volta a janela ao tamanho padrão — sem o campo da
+        planta sobrando vazio depois de removê-la. Cancela também
+        qualquer calibração/desenho em andamento sobre ela, já que os
+        marcadores clicados deixam de fazer sentido sem a imagem."""
+
+        self._modo_clique_planta = None
+        self._marcadores_calibracao_planta = []
+        self._calibracao_planta_atual = None
+        self._converter_planta = None
+        self._vertices_desenhados_planta_utm = []
+
+        if not self._ultimos_pares_utm and not self._ultimos_pares_geograficos:
+            self.grpUtmManual.setVisible(False)
+
+        self.painelPlanta.limpar_imagem()
+        self.painelPlanta.setVisible(False)
+        self.btnLimparImagemPlanta.setVisible(False)
+        self.resize(self._largura_padrao_janela, self.height())
+
+        self.btnDesenharPoligonoPlanta.setEnabled(False)
 
     def iniciar_desenho_sobre_planta(self):
         """Passo 1 do fluxo "Desenhar Polígono na Planta": pede o
@@ -2651,7 +2701,7 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
         requisicao = urllib.request.Request(
             url,
-            headers={"User-Agent": "ColetaRural-QGIS-Plugin/1.2.2"}
+            headers={"User-Agent": "ColetaRural-QGIS-Plugin/1.2.3"}
         )
 
         try:

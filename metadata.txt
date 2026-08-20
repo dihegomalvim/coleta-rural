@@ -8,7 +8,7 @@ qgisMinimumVersion=3.28
 
 description=Imports Coleta Rural PDF survey reports and other memorial descritivo formats (any Brazilian state), automatically creating polygon features in QGIS vector layers — and generates memorial descritivo PDF reports from selected polygons, recognizing SIGEF/CAR public layers.
 
-version=1.2.2
+version=1.2.3
 
 author=Dihêgo Augusto Gomes Malvim de Barros - INCRA Pernambuco
 
@@ -39,7 +39,7 @@ deprecated=False
 server=False
 
 changelog=
-    1.2.2
+    1.2.3
     Aba "Memorial Genérico":
     - Reconhecimento de memoriais descritivos em formato de poligonal (azimute e distância entre vértices, a partir de um vértice inicial com coordenada UTM conhecida), formato topográfico tradicional comum em memoriais mais antigos.
     - Reconhecimento também do mesmo formato de poligonal quando descrito por rumo (quadrante + ângulo, ex.: "NE 45°30'20"") em vez de azimute em graus decimais.
@@ -52,7 +52,7 @@ changelog=
     - Reconhecimento de coordenadas em graus-minutos-segundos escritas por extenso ("8 GRAUS 37 MINUTOS 43,36 SEGUNDOS SUL"), em vez dos símbolos °/'/" — comum em memoriais mais antigos.
     - Reconhecimento de memoriais em formato de poligonal descrita em prosa corrida, a partir de um marco com coordenada geográfica conhecida (ex.: "PARTINDO DO MARCO..., COM LATITUDE... E LONGITUDE..., COM AZIMUTE DE... E DISTANCIA DE...M,... CHEGA AO PONTO..."), comum em memoriais mais antigos do INCRA. Avisa especificamente quando falta o azimute de algum trecho no memorial original, em vez de arriscar uma poligonal incompleta.
     - Reconhecimento de mais uma variação de poligonal em prosa, a partir de vértice com coordenada UTM conhecida, com cada segmento descrito como "com distância de...m e azimute de..., encontramos o vértice...".
-    - Botão "Anexar Imagem (Planta)": carrega uma foto/scan da planta (ou PDF contendo uma) num painel próprio de 600px que expande a janela para a direita, sem criar camada no QGIS. Aceita PDF com várias páginas, deixando escolher visualmente qual imagem usar. Zoom pela roda do mouse; pan pelo botão do meio (pressionar e arrastar), sem alterar o zoom nem marcar ponto nenhum.
+    - Botão "Anexar Imagem (Planta)": carrega uma foto/scan da planta (ou PDF contendo uma) num painel próprio de 600px que expande a janela para a direita, sem criar camada no QGIS. Aceita PDF com várias páginas, deixando escolher visualmente qual imagem usar. Zoom pela roda do mouse; pan pelo botão do meio (pressionar e arrastar), sem alterar o zoom nem marcar ponto nenhum. Botão "Limpar Imagem" (só aparece com uma imagem anexada) remove a planta, esconde o painel e volta a janela ao tamanho padrão.
     - Botão "Desenhar Polígono na Planta": marca os vértices clicando diretamente sobre o desenho da planta, calibrando a partir de um único trecho já conhecido (2 cliques + azimute/distância reais, com 3 opções de coordenada) — o plugin calcula sozinho a rotação e a escala do desenho. Antes de informar o azimute/distância, os 2 marcadores de calibração podem ser arrastados para ajustar a posição exata (clique direito confirma e abre o formulário); os marcadores dos vértices seguintes também podem ser arrastados e excluídos com clique direito em cima deles. Clique direito numa área vazia finaliza o desenho. O formulário de azimute/distância não é mais modal — dá pra continuar dando zoom/pan na planta para conferir uma anotação (comum estar escrita no próprio desenho) enquanto o preenche.
     - Suporte a datum diferente de SIRGAS2000 (ex.: SAD69, comum em memoriais anteriores a 2005) em coordenadas geográficas, tanto na extração de texto quanto na calibração da planta — antes eram sempre tratadas como já sendo SIRGAS2000, deslocando o polígono em documentos antigos. Se não detectado, assume SIRGAS2000 e já extrai/desenha o polígono; o combo "Datum" fica visível ao lado da tabela (inclusive depois de terminar de desenhar sobre a planta) e pode ser corrigido depois de ver o resultado no mapa — recalcula tudo na hora (tabela/área ou o desenho da planta inteiro), sem re-extrair nem clicar nos pontos de novo.
     - Máscara de entrada em todos os campos de coordenada e azimute (Zoom Rápido nos 3 modos, e calibração da planta) — sinal sempre negativo e 2 dígitos de grau na coordenada (azimute usa 3, por ser ângulo de 0-360°), com exemplo com os graus de Brasília (em vez de zeros) na longitude/latitude, em cinza até digitar por cima.

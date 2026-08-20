@@ -6,7 +6,7 @@ O formato segue o padrão de versionamento semântico (Semantic Versioning).
 
 ---
 
-## [1.2.2] - 2026-08-17
+## [1.2.3] - 2026-08-19
 
 ### Adicionado
 
@@ -21,6 +21,7 @@ O formato segue o padrão de versionamento semântico (Semantic Versioning).
 - Máscara de entrada em todos os campos de coordenada e azimute (Zoom Rápido, nos três modos — Geográfica GMS, Geográfica decimal e UTM —, e no formulário de calibração do "Desenhar Polígono na Planta"). A coordenada sempre mostra o sinal negativo já fixo (o plugin atende só o Brasil, que está sempre a Sul e a Oeste) e usa só 2 dígitos de grau (nenhuma latitude/longitude do Brasil passa de 2 dígitos); o azimute usa 3 dígitos (é um ângulo de 0 a 360°, não uma coordenada) e menos casas decimais nos segundos, já que não precisa da mesma precisão da coordenada. Para longitude e latitude (fáceis de confundir — qual campo é qual, e a ordem certa), o valor de exemplo usa os graus de Brasília em vez de zeros genéricos (ex.: "-47°00'00,0000"" na longitude, "-15°00'00,0000"" na latitude — minutos e segundos zerados mesmo, só para dar a magnitude certa), mostrado em cinza até a pessoa digitar por cima; a partir daí o texto volta à cor normal.
 - Identificação automática do Município (e da UF) a partir da localização do imóvel, na aba "Memorial Genérico" — a mesma ideia que o aplicativo oficial Coleta Rural já tem. Quando o memorial não informa o município no texto (ou o polígono vem só do desenho da planta), o plugin consulta o serviço público de geocodificação reversa do OpenStreetMap a partir do centro das coordenadas já extraídas e preenche os campos sozinho. Precisa de internet (mesma exigência já feita pelo croqui com satélite e pelo link do Google Maps, na aba "Gerar Memorial"); se não conseguir, falha em silêncio e os campos continuam vazios para preenchimento manual, como já acontecia antes.
 - Caixa de seleção "Informar Número do Processo SEI" na aba "Gerar Memorial": desmarcada por padrão, deixando o memorial exatamente como já era (sem essa informação no cabeçalho). Ao marcar, habilita um campo com máscara no formato oficial do SEI (00000.000000/0000-00) — se preenchido, o número aparece como a primeira linha da caixa de identificação do PDF ("Processo SEI: ..."); ao desmarcar, o campo é limpo e a linha some do memorial de novo.
+- Botão "Limpar Imagem", ao lado do painel da planta: some junto com o painel (só aparece depois de anexar uma imagem) e, ao clicar, remove a imagem e qualquer marcador/calibração em andamento, esconde o painel de volta e devolve a janela ao tamanho padrão — desfazendo por completo o que "Anexar Imagem (Planta)" fez, sem precisar fechar e reabrir o plugin para tirar a planta da tela.
 
 ### Corrigido
 
@@ -213,4 +214,4 @@ Coleta Rural
 
 **Versão atual**
 
-1.2.2
+1.2.3
