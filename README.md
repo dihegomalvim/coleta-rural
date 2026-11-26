@@ -1,6 +1,6 @@
 # Coleta Rural
 
-## Versão 1.2.3
+## Versão 1.2.5
 
 Plugin QGIS para importação automática de memoriais descritivos (do sistema Coleta Rural ou de outras origens), com criação e gravação de polígonos diretamente em camadas vetoriais previamente configuradas — e geração de memoriais descritivos em PDF a partir de polígonos já selecionados no projeto.
 
@@ -26,7 +26,8 @@ A tela principal é organizada em 4 abas, com a "Camada de destino" e o botão "
 
 ### Aba "Memorial Coleta Rural"
 
-- Seleção do memorial em PDF gerado pelo sistema Coleta Rural;
+- Seleção do memorial em PDF gerado pelo sistema Coleta Rural — ou da Declaração de Posse Mansa e Pacífica gerada pelo app **Declara Rural**, lida da mesma forma (imóvel, município/UF, possuidor, CPF, área, CIR e os vértices da tabela de coordenadas geográficas);
+- Leitura também do memorial descritivo (tabelas, texto corrido e remembramento) e da planta de levantamento georreferenciado do **Coleta Pro**;
 - Leitura automática do conteúdo do documento;
 - Extração de informações do imóvel e dos vértices geográficos;
 - Campos "CIR" (com máscara) e "Matrícula" para preencher antes de salvar, evitando ter que editar a camada depois.

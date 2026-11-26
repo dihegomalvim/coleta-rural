@@ -51,6 +51,7 @@ from qgis.gui import QgsVertexMarker
 
 from .configuracoes_dialog import ConfiguracoesDialog
 from . import coordenadas
+from . import leitor_coletapro
 from . import memorial_pdf
 from . import municipios_pe
 
@@ -932,6 +933,11 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
             self.arquivo_pdf = arquivo
 
+            # nada do documento anterior pode sobrar neste
+            self.vertices = []
+            self.txtCirColetaRural.clear()
+            self.txtMatriculaColetaRural.clear()
+
             reader = PdfReader(arquivo)
 
             texto = ""
@@ -981,7 +987,172 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
         return resultado.group(1).strip() if resultado else ""
 
+    def _preencher_dados_declara_rural(self, texto):
+        """Declaração de Posse do app Declara Rural: tratada como um
+        memorial padrão (mesmos campos e mesma pré-visualização/gravação
+        da aba), com os dados lidos pelos rótulos do documento e os
+        vértices pela tabela de coordenadas geográficas (P#, SIRGAS 2000
+        em graus decimais)."""
+
+        dados = coordenadas.extrair_dados_declara_rural(texto)
+
+        self.imovel = dados["imovel"]
+        self.municipio = dados["municipio"]
+        self.uf = dados["uf"]
+        self.area = dados["area"]
+        self.declarante = dados["declarante"]
+        self.cpf = dados["cpf"]
+
+        self.lblImovel.setText(self.imovel or "-")
+        self.lblMunicipio.setText(
+            f"{self.municipio}/{self.uf}" if self.uf and self.municipio
+            else (self.municipio or "-")
+        )
+        self.lblArea.setText(self.area or "-")
+        self.lblDeclarante.setText(self.declarante or "-")
+
+        # o CIR declarado já vem no campo (editável) da aba
+        self.txtCirColetaRural.setText(dados["cir"])
+
+        vertices = coordenadas.extrair_vertices_declara_rural(texto)
+
+        pontos = [QgsPointXY(lon, lat) for _, lat, lon in vertices]
+
+        datum = dados["datum"] or "SIRGAS2000"
+
+        if datum != "SIRGAS2000":
+
+            try:
+                pontos = coordenadas.transformar_pontos_geograficos(
+                    pontos, datum
+                )
+            except Exception as erro:
+                print(f"Erro ao converter datum {datum}: {erro}")
+
+        self.vertices = pontos
+
+    def _vertices_documento_coletapro(self, texto):
+        """Vértices (EPSG:4674) de um memorial ou planta do Coleta Pro.
+        Devolve (vertices, quantidade_de_poligonais); a lista vem vazia
+        se o operador desistir de escolher a poligonal. Levanta
+        ValueError se o documento não tiver tabela de vértices."""
+
+        poligonais = leitor_coletapro.extrair_poligonais(texto)
+
+        if not poligonais:
+            raise ValueError(
+                "Este documento do Coleta Pro não traz os vértices do "
+                "perímetro. Use o memorial descritivo ou a planta de "
+                "levantamento georreferenciado (plantas temáticas e termos "
+                "não têm a tabela de coordenadas completa)."
+            )
+
+        def converter(poligonal):
+
+            pontos = [QgsPointXY(x, y) for x, y in poligonal["vertices"]]
+
+            if poligonal["sistema"] == "geografico":
+                return pontos
+
+            if poligonal["fuso"] is None:
+                raise ValueError(
+                    "O documento está em UTM, mas não informa o fuso."
+                )
+
+            return coordenadas.transformar_pontos(
+                pontos,
+                coordenadas.montar_crs_utm(
+                    poligonal["fuso"], poligonal["datum"]
+                ),
+                QgsCoordinateReferenceSystem(coordenadas.CRS_GEOGRAFICO)
+            )
+
+        convertidas = [converter(p) for p in poligonais]
+
+        if len(convertidas) == 1:
+            return convertidas[0], 1
+
+        # parcelas separadas: cada uma é importada como um polígono
+        opcoes = [
+            f"Poligonal {i + 1} — {len(pontos)} vértices, "
+            f"{coordenadas.calcular_area_hectares(pontos):.4f} ha"
+            for i, pontos in enumerate(convertidas)
+        ]
+
+        escolha, confirmado = QInputDialog.getItem(
+            self,
+            "Coleta Rural",
+            f"O documento tem {len(opcoes)} poligonais separadas. Qual "
+            "deseja importar? (para as outras, abra o documento de novo)",
+            opcoes,
+            0,
+            False
+        )
+
+        if not confirmado:
+            return [], len(convertidas)
+
+        return convertidas[opcoes.index(escolha)], len(convertidas)
+
+    def _preencher_dados_coletapro(self, texto):
+        """Memorial ou planta do Coleta Pro, tratado como um memorial
+        padrão (mesma pré-visualização e gravação da aba)."""
+
+        dados = leitor_coletapro.extrair_dados(texto)
+
+        vertices, quantidade = self._vertices_documento_coletapro(texto)
+
+        self.vertices = vertices
+        self.imovel = dados["imovel"]
+        self.municipio = dados["municipio"]
+        self.uf = dados["uf"]
+        self.declarante = dados["declarante"]
+        self.cpf = dados["cpf"]
+        self.area = f"{dados['area']} ha" if dados["area"] else ""
+
+        # com várias poligonais, a área do documento é a do conjunto
+        if vertices and (quantidade > 1 or not self.area):
+            area_ha = coordenadas.calcular_area_hectares(vertices)
+            self.area = f"{area_ha:.4f}".replace(".", ",") + " ha"
+
+        self.lblImovel.setText(self.imovel or "-")
+        self.lblMunicipio.setText(
+            f"{self.municipio}/{self.uf}" if self.uf and self.municipio
+            else (self.municipio or "-")
+        )
+        self.lblArea.setText(self.area or "-")
+        self.lblDeclarante.setText(self.declarante or "-")
+
+        self.txtCirColetaRural.setText(dados["cir"])
+        self.txtMatriculaColetaRural.setText(dados["matricula"])
+
     def preencher_dados(self, texto):
+
+        if leitor_coletapro.eh_coletapro(texto):
+
+            try:
+                self._preencher_dados_coletapro(texto)
+            except Exception as erro:
+                QMessageBox.warning(
+                    self,
+                    "Aviso",
+                    f"Erro ao processar o documento do Coleta Pro:\n\n{erro}"
+                )
+
+            return
+
+        if coordenadas.eh_declara_rural(texto):
+
+            try:
+                self._preencher_dados_declara_rural(texto)
+            except Exception as erro:
+                QMessageBox.warning(
+                    self,
+                    "Aviso",
+                    f"Erro ao processar a declaração:\n\n{erro}"
+                )
+
+            return
 
         try:
 
@@ -2546,7 +2717,59 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
         return texto_municipio, ""
 
+    def _extrair_dados_manual_declara_rural(self, texto):
+
+        dados = coordenadas.extrair_dados_declara_rural(texto)
+
+        self.txtImovelManual.setText(dados["imovel"])
+        self.txtMunicipioManual.setText(dados["municipio"])
+        self.txtUfManual.setText(dados["uf"])
+        self.txtDeclaranteManual.setText(dados["declarante"])
+        self._formatar_cpf_cnpj(self.txtCpfManual, dados["cpf"])
+        self.txtCirManual.setText(dados["cir"])
+        self.txtMatriculaManual.clear()
+
+    def _extrair_dados_manual_coletapro(self, texto):
+
+        dados = leitor_coletapro.extrair_dados(texto)
+
+        self.txtImovelManual.setText(dados["imovel"])
+        self.txtMunicipioManual.setText(dados["municipio"])
+        self.txtUfManual.setText(dados["uf"])
+        self.txtDeclaranteManual.setText(dados["declarante"])
+        self._formatar_cpf_cnpj(self.txtCpfManual, dados["cpf"])
+        self.txtCirManual.setText(dados["cir"])
+        self.txtMatriculaManual.setText(dados["matricula"])
+
     def extrair_dados_manual(self, texto):
+
+        if leitor_coletapro.eh_coletapro(texto):
+
+            try:
+                self._extrair_dados_manual_coletapro(texto)
+            except Exception as erro:
+                QMessageBox.warning(
+                    self,
+                    "Aviso",
+                    "Erro ao tentar extrair automaticamente os dados do "
+                    f"imóvel:\n\n{erro}"
+                )
+
+            return
+
+        if coordenadas.eh_declara_rural(texto):
+
+            try:
+                self._extrair_dados_manual_declara_rural(texto)
+            except Exception as erro:
+                QMessageBox.warning(
+                    self,
+                    "Aviso",
+                    "Erro ao tentar extrair automaticamente os dados do "
+                    f"imóvel:\n\n{erro}"
+                )
+
+            return
 
         try:
 
@@ -2701,7 +2924,7 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
         requisicao = urllib.request.Request(
             url,
-            headers={"User-Agent": "ColetaRural-QGIS-Plugin/1.2.3"}
+            headers={"User-Agent": "ColetaRural-QGIS-Plugin/1.2.5"}
         )
 
         try:
@@ -2883,6 +3106,39 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
         # reconhecer esse formato, comum em memoriais mais antigos.
         texto = coordenadas.normalizar_gms_por_extenso(texto)
 
+        # memorial ou planta do Coleta Pro: leitor próprio (só a tabela
+        # do perímetro principal, sem somar as parcelas repetidas no fim)
+        if leitor_coletapro.eh_coletapro(texto):
+
+            try:
+                vertices_cp, _ = self._vertices_documento_coletapro(texto)
+            except ValueError as erro:
+                QMessageBox.warning(self, "Coleta Rural", str(erro))
+                return
+
+            if vertices_cp:
+                self._finalizar_vertices_geograficos(
+                    [(p.x(), p.y()) for p in vertices_cp]
+                )
+
+            return
+
+        # Declaração de Posse do Declara Rural: tabela própria de
+        # vértices P# em graus decimais, lida pelo número do vértice
+        if coordenadas.eh_declara_rural(texto):
+
+            vertices_declara = coordenadas.extrair_vertices_declara_rural(
+                texto
+            )
+
+            if len(vertices_declara) >= 3:
+
+                self._finalizar_vertices_geograficos(
+                    [(lon, lat) for _, lat, lon in vertices_declara]
+                )
+
+                return
+
         # Tenta primeiro os formatos com rótulo explícito por vértice
         # (Longitude/Latitude ou N/E) — são inequívocos, então vêm antes
         # da tabela em duas colunas, cuja heurística (procurar cabeçalhos
@@ -2904,6 +3160,35 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
         if len(pares_gms_hemisferio) >= 3:
             self._finalizar_vertices_geograficos(pares_gms_hemisferio)
+            return
+
+        # mesma ideia, mas sem letra de hemisfério nenhuma: só longitude
+        # e latitude entre aspas, separadas por ponto e vírgula, uma por
+        # linha (comum em tabelas exportadas por software de
+        # levantamento georreferenciado) — o sinal já vem explícito em
+        # cada valor, então não precisa de mais nada para saber o eixo
+        pares_gms_quotados = coordenadas.extrair_pares_gms_quotados(texto)
+
+        if len(pares_gms_quotados) >= 3:
+            self._finalizar_vertices_geograficos(pares_gms_quotados)
+            return
+
+        # tabela de coordenadas copiada com as duas colunas lado a lado
+        # (tab/espaço entre longitude e latitude, uma linha por vértice)
+        pares_gms_linha = coordenadas.extrair_pares_gms_por_linha(texto)
+
+        if len(pares_gms_linha) >= 3:
+            self._finalizar_vertices_geograficos(pares_gms_linha)
+            return
+
+        # tabela de coordenadas que o OCR despejou coluna por coluna:
+        # todas as longitudes em sequência e só depois todas as
+        # latitudes (ou o contrário) — o i-ésimo valor de um bloco forma
+        # par com o i-ésimo do outro
+        pares_gms_colunas = coordenadas.extrair_pares_gms_colunas_separadas(texto)
+
+        if len(pares_gms_colunas) >= 3:
+            self._finalizar_vertices_geograficos(pares_gms_colunas)
             return
 
         # poligonal descrita em prosa corrida, a partir de um marco com
@@ -2972,6 +3257,33 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
             self._tentar_vertices_utm(pares_tabela)
             return
 
+        # mesma tabela em colunas separadas, mas em coordenadas planas
+        # (UTM) e sem os cabeçalhos "Norte"/"Este" que o formato acima
+        # exige: todos os Este em sequência e só depois todos os Norte
+        pares_utm_colunas = coordenadas.extrair_pares_utm_colunas_separadas(texto)
+
+        if len(pares_utm_colunas) >= 3:
+            self._tentar_vertices_utm(pares_utm_colunas)
+            return
+
+        # mesma tabela em colunas separadas, mas em graus decimais
+        pares_decimais_colunas = coordenadas.extrair_pares_decimais_colunas_separadas(texto)
+
+        if len(pares_decimais_colunas) >= 3:
+            self._finalizar_vertices_geograficos(pares_decimais_colunas)
+            return
+
+        # colunas de longitude/latitude com quantidades diferentes
+        # (linha perdida ou duplicada no OCR): avisa em vez de deixar
+        # cair no reconhecimento genérico e desenhar um polígono errado
+        diagnostico_colunas = coordenadas.diagnosticar_colunas_separadas(texto)
+
+        if diagnostico_colunas:
+
+            QMessageBox.warning(self, "Coleta Rural", diagnostico_colunas)
+
+            return
+
         pares = coordenadas.extrair_pares_numericos_texto_livre(texto)
 
         if len(pares) < 3:
@@ -3004,16 +3316,24 @@ class ColetaRuralDialog(QtWidgets.QDialog, FORM_CLASS):
 
             return
 
+        # "indefinido" também conta como anômalo (antes ficava de fora
+        # dessa lista e passava batido sem nenhum aviso): um par que não
+        # bate nem com "geografico" nem com "utm" não é confiável — é
+        # exatamente o tipo de vértice que, sem aviso nenhum, gerava um
+        # polígono absurdo (esticado pelo mapa inteiro) a partir de um
+        # fragmento mal interpretado do texto original
         anomalos = [
             i for i, classificacao in enumerate(classificacoes, start=1)
-            if classificacao not in (tipo, "indefinido")
+            if classificacao != tipo
         ]
 
         if anomalos:
 
             self.lblAvisoFormatoManual.setText(
-                f"Aviso: as coordenadas do(s) vértice(s) {anomalos} parecem estar "
-                "num formato diferente dos demais. Confira a tabela abaixo."
+                f"Aviso: as coordenadas do(s) vértice(s) {anomalos} não "
+                "parecem confiáveis (formato diferente dos demais, ou "
+                "fora do padrão esperado para o Brasil). Confira a "
+                "tabela abaixo antes de salvar."
             )
 
         if tipo == "utm":

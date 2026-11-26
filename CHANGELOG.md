@@ -6,6 +6,42 @@ O formato segue o padrão de versionamento semântico (Semantic Versioning).
 
 ---
 
+## [1.2.5] - 2026-11-26
+
+### Adicionado
+
+- **Documentos do Coleta Pro** reconhecidos nas abas "Memorial Coleta Rural" e "Memorial Genérico": memorial descritivo em tabelas (formato atual, com latitude e longitude, e o das primeiras versões, só em UTM com o fuso por linha), memorial em texto corrido (coordenadas UTM, geográficas decimais ou GMS reproduzidas do SIGEF), memorial de remembramento e **planta de levantamento georreferenciado** (tabela de coordenadas em graus decimais ou GMS). São preenchidos Imóvel, Município/UF, proprietário/possuidor (o titular, não quem apenas declarou o cadastro), CPF, CIR, Matrícula e Área.
+- Só o perímetro principal é importado: os memoriais individuais das parcelas e o termo de concordância anexados ao fim do PDF repetem os vértices e não são somados. Quando o documento tem poligonais separadas, o plugin pergunta qual importar e calcula a área dela.
+- Documentos do Coleta Pro sem a tabela de vértices do perímetro (plantas temáticas, termos) recebem um aviso explicando qual documento usar.
+
+### Corrigido
+
+- **Declara Rural:** em imóvel abrangendo vários municípios, o nome do imóvel saía junto com o município (o rótulo passa a ser "Município sede — UF"); declarações de versões anteriores do app, com a tabela de coordenadas sem o símbolo de grau, não tinham os vértices lidos; o modelo antigo de prefeitura, em texto corrido, não tinha os dados do imóvel lidos.
+- Ao selecionar outro PDF na aba "Memorial Coleta Rural", o CIR, a Matrícula e os vértices do documento anterior são limpos.
+
+---
+
+## [1.2.4] - 2026-10-09
+
+### Adicionado
+
+- **Declara Rural** como novo formato padrão de leitura. O PDF da Declaração de Posse Mansa e Pacífica gerado pelo app Declara Rural (identificado pelo título e pelo código "Cód. DR-…" do rodapé) agora é lido na aba "Memorial Coleta Rural" exatamente como o memorial do Coleta Rural: preenche Imóvel, Município/UF, Declarante (possuidor), CPF, Área total e CIR pelos rótulos do documento, lê a tabela "COORDENADAS GEOGRÁFICAS" (vértices P1…Pn em graus decimais, latitude e longitude, datum SIRGAS 2000) e permite visualizar e salvar na camada. Os vértices são ordenados pelo número (P1, P2, P3…), não pela ordem em que o texto do PDF os apresenta (a tabela vem em três blocos de colunas lado a lado), e o ponto único "COORDENADA GEOGRÁFICA" de referência do cabeçalho do imóvel não é tratado como vértice. A aba "Memorial Genérico" também reconhece o mesmo documento.
+- Reconhecimento de **memoriais tabelados** (e plantas com tabela de coordenadas) na aba "Memorial Genérico", em graus-minutos-segundos ou graus decimais. O OCR de uma tabela de duas colunas costuma despejar todas as longitudes em sequência e só depois todas as latitudes (coluna por coluna), o que obrigava a levar o texto ao Excel, recortar e colar as colunas lado a lado antes de colar na caixa de texto. Agora o plugin reconhece sozinho os dois blocos e forma o par pelo i-ésimo valor de cada um, mesmo com rótulos de vértice, cabeçalhos "Longitude"/"Latitude" ou algum azimute solto no meio. Qual bloco é longitude e qual é latitude é decidido pela própria geografia do Brasil (no continente, o módulo da longitude é sempre maior que o da latitude), então funciona também com a latitude vindo primeiro. Se a quantidade de longitudes e latitudes não bater (típico de uma linha perdida ou duplicada pelo OCR), o plugin avisa exatamente quantas encontrou de cada, em vez de chutar um pareamento.
+- O mesmo vale para tabelas em **coordenadas planas (UTM)**: o reconhecimento de colunas separadas só funcionava quando o OCR preservava os cabeçalhos "Norte"/"Este"; agora também funciona só com os números (todos os Este em sequência e depois todos os Norte, ou o contrário). Aqui a distinção vem da própria faixa de valores das zonas UTM brasileiras (Este entre ~100 mil e 1 milhão, Norte entre ~5 e ~10,6 milhões). Quantidades diferentes de Este e Norte geram o mesmo aviso específico. Tabelas UTM lado a lado (Este e Norte na mesma linha) já eram aceitas e continuam.
+- Reconhecimento das tabelas coladas já lado a lado (longitude e latitude na mesma linha, separadas por tab, espaço, vírgula ou barra vertical, com ou sem rótulo de vértice como P1/V-01, em qualquer ordem de colunas). Antes só o formato separado por ponto e vírgula era reconhecido; os demais caíam no reconhecimento genérico, que descartava os graus.
+- Se o OCR perder o sinal "-" de uma coluna inteira (comum em tabelas escaneadas), os valores sem sinal são interpretados no quadrante sudoeste, já que o Coleta Rural atende o Brasil. Sinal explícito ("-" ou "+") é sempre respeitado.
+
+### Melhorado
+
+- Coordenadas em graus-minutos-segundos agora toleram aspas tipográficas (’ ‘ ´ ” “) e duas aspas simples no lugar da aspa dupla de segundos, variações comuns na saída de OCR, em todos os formatos de coordenada geográfica do plugin.
+
+### Corrigido
+
+- Corrigido um bug grave em que alguns memoriais desenhavam um polígono completamente absurdo (esticado por vários estados, às vezes até fora do Brasil), sem nenhum aviso. Acontecia com memoriais que listam as coordenadas de cada vértice em graus-minutos-segundos entre aspas, longitude e depois latitude, separadas por ponto e vírgula, uma por linha — sem rótulo "Longitude:"/"Latitude:" e sem letra de hemisfério (ex.: `-35°03'43,486";-08°05'54,295"`), formato comum em tabelas exportadas por softwares de levantamento georreferenciado. Como nenhum reconhecimento específico existia para esse formato, o texto caía no reconhecimento genérico de números soltos (pensado para tabelas UTM simples), que não entende a estrutura °'" e tratava fragmentos do próprio valor (minutos, segundos) como se fossem a coordenada inteira. Agora esse formato tem reconhecimento próprio. De quebra, também corrigido: um erro comum de digitação/OCR troca a vírgula decimal dos segundos por uma aspa simples bem parecida (ex.: `02'397"` em vez de `02,397"`) — antes isso fazia esse vértice específico ser descartado (ou pior, capturado errado pelo reconhecimento genérico); agora é tolerado normalmente, em qualquer formato de coordenada geográfica do plugin.
+- Reforçado o reconhecimento genérico de números soltos (o último recurso, usado quando nenhum formato específico bate) com uma regra baseada em geografia: como o Coleta Rural atende só o Brasil, que fica inteiro no quadrante sudoeste, longitude e latitude são sempre negativas. Um par de números positivos com magnitude pequena (ex.: um fragmento de minutos/segundos confundido com a coordenada inteira, como no bug do Sítio Muricé acima) não é mais aceito como coordenada geográfica válida — e, diferente de antes, um vértice nessa situação agora sempre aparece no aviso "coordenadas não parecem confiáveis" em vez de passar batido sem nenhum sinal (o aviso já existia para casos "fora do padrão dos demais", mas por engano nunca disparava para esse tipo específico de par não-classificado).
+
+---
+
 ## [1.2.3] - 2026-08-19
 
 ### Adicionado
@@ -214,4 +250,4 @@ Coleta Rural
 
 **Versão atual**
 
-1.2.3
+1.2.5

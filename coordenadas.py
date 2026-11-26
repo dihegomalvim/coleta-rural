@@ -191,7 +191,20 @@ def extrair_pares_numericos_texto_livre(texto):
 # Valor em graus-minutos-segundos, ex.: -37°19'23,169" (tolera espaços e
 # quebras de linha entre as partes, comuns em texto copiado de PDF).
 _VALOR_GMS = (
-    r"-?\s*\d{1,3}\s*°\s*\d{1,2}\s*['′]\s*\d{1,2}(?:[.,]\d+)?\s*[\"″]"
+    # o separador decimal dos segundos tolera aspa simples além de
+    # vírgula/ponto: um erro de OCR/digitação comum troca a vírgula
+    # decimal por uma aspa simples bem parecida (ex.: 02'397" em vez
+    # de 02,397") — sem essa tolerância, o valor inteiro falha em
+    # casar com o padrão e o vértice acaba sendo descartado ou, pior,
+    # capturado por um extrator genérico que não entende graus-
+    # minutos-segundos e produz uma coordenada absurda a partir dos
+    # fragmentos soltos
+    #
+    # Os marcadores de minuto/segundo também aceitam as variações que o
+    # OCR costuma produzir: aspas tipográficas (’ ‘ ´ ” “) e duas aspas
+    # simples no lugar da aspa dupla de segundos ('').
+    r"[-+]?\s*\d{1,3}\s*°\s*\d{1,2}\s*['′’‘´]\s*\d{1,2}(?:['′’.,]\d+)?"
+    r"\s*(?:[\"″”“]|''|’’|′′)"
 )
 
 # Valor em graus-minutos-segundos escrito por extenso, com as palavras
@@ -269,7 +282,8 @@ def valor_coordenada_para_decimal(texto_valor):
     texto_valor = texto_valor.strip()
 
     gms = re.match(
-        r"(-?)\s*(\d{1,3})\s*°\s*(\d{1,2})\s*['′]\s*(\d{1,2}(?:[.,]\d+)?)\s*[\"″]",
+        r"([-+]?)\s*(\d{1,3})\s*°\s*(\d{1,2})\s*['′’‘´]\s*"
+        r"(\d{1,2}(?:['′’.,]\d+)?)\s*(?:[\"″”“]|''|’’|′′)",
         texto_valor
     )
 
@@ -277,10 +291,18 @@ def valor_coordenada_para_decimal(texto_valor):
 
         sinal, graus, minutos, segundos = gms.groups()
 
+        # o separador decimal dos segundos pode ter vindo como aspa
+        # simples (erro comum de OCR/digitação no lugar da vírgula) —
+        # normaliza os jeitos possíveis para ponto antes do float()
+        segundos = (
+            segundos.replace("'", ".").replace("′", ".")
+            .replace("’", ".").replace(",", ".")
+        )
+
         valor = (
             float(graus)
             + float(minutos) / 60
-            + float(segundos.replace(",", ".")) / 3600
+            + float(segundos) / 3600
         )
 
         return -valor if sinal == "-" else valor
@@ -407,6 +429,382 @@ def extrair_pares_gms_com_hemisferio(texto):
             longitude_pendente = None
 
     return pares
+
+
+# Par de coordenadas geográficas em graus-minutos-segundos "cruas": só os
+# dois valores entre aspas, longitude e depois latitude, separados por
+# ponto e vírgula, um par por linha — sem rótulo "Longitude:"/"Latitude:"
+# nem letra de hemisfério (ex.: -35°03'43,486";-08°05'54,295"). Formato
+# de exportação comum em softwares de levantamento georreferenciado
+# (plantas com título "PLANTA DE LEVANTAMENTO GEORREFERENCIADO"). Sem
+# esse reconhecimento específico, esse formato não batia com nenhum
+# extrator estruturado e caía direto no reconhecimento genérico de
+# números soltos — que não entende a estrutura °'" e tratava fragmentos
+# do próprio valor (minutos, segundos) como se fossem a coordenada
+# inteira, produzindo vértices absurdamente errados.
+_PADRAO_PAR_GMS_QUOTADO = re.compile(rf"({_VALOR_GMS})\s*;\s*({_VALOR_GMS})")
+
+
+def extrair_pares_gms_quotados(texto):
+    """Procura pares de coordenadas geográficas em graus-minutos-segundos
+    escritos em sequência, sem rótulo nem letra de hemisfério — só
+    longitude e latitude entre aspas, separadas por ponto e vírgula (ver
+    _PADRAO_PAR_GMS_QUOTADO). Segue a mesma convenção (longitude,
+    depois latitude) usada pelo resto do módulo quando a ordem já vem
+    explícita na própria sequência dos valores."""
+
+    pares = []
+
+    for encontro in _PADRAO_PAR_GMS_QUOTADO.finditer(texto):
+
+        try:
+            longitude = valor_coordenada_para_decimal(encontro.group(1))
+            latitude = valor_coordenada_para_decimal(encontro.group(2))
+        except ValueError:
+            continue
+
+        pares.append((longitude, latitude))
+
+    return pares
+
+
+# --- Tabelas de coordenadas geográficas (colunas Longitude/Latitude) ------
+#
+# Memoriais tabelados (e plantas com tabela de coordenadas) costumam sair
+# do OCR com as duas colunas "desmontadas": ou todas as longitudes numa
+# sequência e só depois todas as latitudes (coluna por coluna), ou os dois
+# valores lado a lado na mesma linha separados por tab/espaço. Nenhum dos
+# extratores acima reconhece isso (eles exigem rótulo, letra de hemisfério
+# ou ponto e vírgula entre os valores), e o texto acabava no
+# reconhecimento genérico, que descarta os graus.
+#
+# Como o Coleta Rural atende só o Brasil, dá para identificar qual valor é
+# longitude e qual é latitude pela própria geografia, sem depender da
+# ordem das colunas: no continente brasileiro o módulo da longitude (cerca
+# de 29°–74° W) é sempre maior que o da latitude (0°–34° S).
+
+_LIMITES_LONGITUDE_BRASIL = (28.0, 75.0)
+_LIMITE_LATITUDE_BRASIL = 34.5
+
+_REGEX_VALOR_GMS = re.compile(_VALOR_GMS)
+
+_REGEX_VALOR_DECIMAL_GEO = re.compile(
+    r"(?<![\d.,])([-+]?\s?\d{1,2}[.,]\d{4,})(?!\d)"
+)
+
+
+def _sinal_brasil(texto_valor, valor):
+    """Aplica a convenção do quadrante sudoeste (longitude e latitude
+    negativas) quando o valor veio sem sinal — o OCR costuma perder o
+    "-" fino de uma coluna de tabela. Sinal explícito ("-" ou "+") é
+    sempre respeitado."""
+
+    if texto_valor.lstrip().startswith(("-", "+")):
+        return valor
+
+    return -abs(valor)
+
+
+def _par_plausivel_brasil(a, b):
+    """Devolve (longitude, latitude) se os dois valores formam um par
+    plausível para o Brasil — o de maior módulo é a longitude, que tem de
+    ser negativa e ficar entre 28° e 75° W; a latitude tem módulo até
+    34,5° —, ou None se não for."""
+
+    maior, menor = (a, b) if abs(a) >= abs(b) else (b, a)
+
+    if not (
+        maior < 0
+        and _LIMITES_LONGITUDE_BRASIL[0] <= abs(maior) <= _LIMITES_LONGITUDE_BRASIL[1]
+        and abs(menor) <= _LIMITE_LATITUDE_BRASIL
+    ):
+        return None
+
+    return maior, menor
+
+
+def extrair_pares_gms_por_linha(texto):
+    """Procura linhas com exatamente dois valores em graus-minutos-segundos
+    (longitude e latitude, em qualquer ordem), separados por tab, espaço,
+    vírgula ou barra vertical — o que sobra da tabela de coordenadas depois
+    de copiar as duas colunas lado a lado (ex.: do Excel). Aceita um
+    rótulo de vértice na linha (P1, V-01...). Cada par é validado pela
+    geografia do Brasil (ver _par_plausivel_brasil); linhas que não
+    batem (azimutes, distâncias...) são ignoradas."""
+
+    pares = []
+
+    for linha in texto.splitlines():
+
+        encontros = list(_REGEX_VALOR_GMS.finditer(linha))
+
+        if len(encontros) != 2:
+            continue
+
+        try:
+            a = valor_coordenada_para_decimal(encontros[0].group(0))
+            b = valor_coordenada_para_decimal(encontros[1].group(0))
+        except ValueError:
+            continue
+
+        ambos_com_sinal = all(
+            e.group(0).lstrip().startswith(("-", "+")) for e in encontros
+        )
+
+        resto = linha[:encontros[0].start()] + linha[encontros[0].end():encontros[1].start()] + linha[encontros[1].end():]
+
+        # sem sinal explícito nos dois, só aceita linha "limpa" (nada além
+        # dos dois valores) — com rótulo de vértice por perto, um azimute
+        # sem sinal poderia ser confundido com coordenada
+        if not ambos_com_sinal and re.search(r"[A-Za-z0-9]", resto):
+            continue
+
+        a = _sinal_brasil(encontros[0].group(0), a)
+        b = _sinal_brasil(encontros[1].group(0), b)
+
+        par = _par_plausivel_brasil(a, b)
+
+        if par is not None:
+            pares.append(par)
+
+    return pares
+
+
+def _localizar_blocos_lon_lat(valores):
+    """Dada a sequência de valores (graus decimais, na ordem do texto),
+    procura dois blocos contíguos de valores muito próximos entre si —
+    uma coluna de longitudes e uma de latitudes, em qualquer ordem — e
+    devolve (longitudes, latitudes), ou None se a sequência não tiver essa
+    cara. Um salto maior que 1° entre valores seguidos separa um bloco do
+    outro; blocos com menos de 3 valores (ruído solto, como um azimute no
+    meio do texto) são ignorados."""
+
+    if len(valores) < 6:
+        return None
+
+    corridas = [[valores[0]]]
+
+    for valor in valores[1:]:
+
+        if abs(valor - corridas[-1][-1]) > 1.0:
+            corridas.append([valor])
+        else:
+            corridas[-1].append(valor)
+
+    candidatas = [c for c in corridas if len(c) >= 3]
+
+    if len(candidatas) != 2:
+        return None
+
+    media = [sum(abs(v) for v in c) / len(c) for c in candidatas]
+
+    if media[0] >= media[1]:
+        longitudes, latitudes = candidatas
+        media_lon, media_lat = media
+    else:
+        latitudes, longitudes = candidatas
+        media_lat, media_lon = media
+
+    if not (
+        longitudes[0] < 0
+        and _LIMITES_LONGITUDE_BRASIL[0] <= media_lon <= _LIMITES_LONGITUDE_BRASIL[1]
+        and media_lat <= _LIMITE_LATITUDE_BRASIL
+    ):
+        return None
+
+    return longitudes, latitudes
+
+
+def _valores_gms_do_texto(texto):
+
+    valores = []
+
+    for encontro in _REGEX_VALOR_GMS.finditer(texto):
+
+        try:
+            valor = valor_coordenada_para_decimal(encontro.group(0))
+        except ValueError:
+            continue
+
+        valores.append(_sinal_brasil(encontro.group(0), valor))
+
+    return valores
+
+
+def _valores_decimais_do_texto(texto):
+
+    valores = []
+
+    for encontro in _REGEX_VALOR_DECIMAL_GEO.finditer(texto):
+
+        token = encontro.group(1)
+
+        try:
+            valor = float(token.replace(" ", "").replace(",", "."))
+        except ValueError:
+            continue
+
+        valores.append(_sinal_brasil(token, valor))
+
+    return valores
+
+
+def _pares_de_colunas_separadas(valores):
+
+    blocos = _localizar_blocos_lon_lat(valores)
+
+    if blocos is None:
+        return []
+
+    longitudes, latitudes = blocos
+
+    if len(longitudes) != len(latitudes):
+        return []
+
+    return list(zip(longitudes, latitudes))
+
+
+def extrair_pares_gms_colunas_separadas(texto):
+    """Reconhece a tabela de coordenadas em graus-minutos-segundos que o
+    OCR despejou coluna por coluna: todas as longitudes em sequência e,
+    depois, todas as latitudes (ou o contrário). O i-ésimo valor do
+    primeiro bloco forma par com o i-ésimo valor do segundo. Exige dois
+    blocos de mesmo tamanho (mínimo 3), validados pela geografia do Brasil
+    (ver _localizar_blocos_lon_lat); qualquer outro texto devolve lista
+    vazia. Retorna pares (longitude, latitude)."""
+
+    return _pares_de_colunas_separadas(_valores_gms_do_texto(texto))
+
+
+def extrair_pares_decimais_colunas_separadas(texto):
+    """Mesma ideia de extrair_pares_gms_colunas_separadas, para tabelas em
+    graus decimais (ex.: -36,891784 / -9,196377)."""
+
+    return _pares_de_colunas_separadas(_valores_decimais_do_texto(texto))
+
+
+# --- Mesma tabela, em coordenadas planas (UTM) ------------------------------
+#
+# extrair_pares_tabela_colunas só reconhece duas listas separadas quando o
+# OCR preservou os cabeçalhos "Norte"/"Este". Sem cabeçalho (só os
+# números, como costuma sair de uma tabela de planta), nada era
+# reconhecido. Aqui a distinção também vem da geografia: nas zonas UTM
+# brasileiras (hemisfério sul) o Este fica entre ~166 mil e ~834 mil e o
+# Norte entre ~5 milhões e ~10,6 milhões — nunca se confundem.
+
+_LIMITES_ESTE_UTM = (100000.0, 1000000.0)
+_LIMITES_NORTE_UTM = (5000000.0, 10600000.0)
+
+
+def _valores_utm_do_texto(texto):
+
+    valores = []
+
+    for encontro in PADRAO_NUMERO.finditer(texto):
+
+        try:
+            valor = _texto_numero_para_float(encontro.group(0))
+        except ValueError:
+            continue
+
+        if (
+            _LIMITES_ESTE_UTM[0] <= valor <= _LIMITES_ESTE_UTM[1]
+            or _LIMITES_NORTE_UTM[0] <= valor <= _LIMITES_NORTE_UTM[1]
+        ):
+            valores.append(valor)
+
+    return valores
+
+
+def _localizar_blocos_utm(valores):
+    """Como _localizar_blocos_lon_lat, para Este/Norte: devolve
+    (estes, nortes) se a sequência tiver exatamente dois blocos
+    contíguos (mínimo 3 valores cada), um de cada tipo."""
+
+    if len(valores) < 6:
+        return None
+
+    corridas = [[valores[0]]]
+
+    for valor in valores[1:]:
+
+        if abs(valor - corridas[-1][-1]) > 1000000.0:
+            corridas.append([valor])
+        else:
+            corridas[-1].append(valor)
+
+    candidatas = [c for c in corridas if len(c) >= 3]
+
+    if len(candidatas) != 2:
+        return None
+
+    media = [sum(c) / len(c) for c in candidatas]
+
+    if media[0] > media[1]:
+        nortes, estes = candidatas
+    else:
+        estes, nortes = candidatas
+
+    if not all(_LIMITES_ESTE_UTM[0] <= v <= _LIMITES_ESTE_UTM[1] for v in estes):
+        return None
+
+    if not all(_LIMITES_NORTE_UTM[0] <= v <= _LIMITES_NORTE_UTM[1] for v in nortes):
+        return None
+
+    return estes, nortes
+
+
+def extrair_pares_utm_colunas_separadas(texto):
+    """Reconhece a tabela de coordenadas UTM que o OCR despejou coluna por
+    coluna, sem cabeçalho: todos os valores de Este em sequência e só
+    depois todos os de Norte (ou o contrário). O i-ésimo valor de um bloco
+    forma par com o i-ésimo do outro. Exige dois blocos de mesmo tamanho
+    (mínimo 3). Retorna pares (este, norte), prontos para
+    _tentar_vertices_utm."""
+
+    blocos = _localizar_blocos_utm(_valores_utm_do_texto(texto))
+
+    if blocos is None or len(blocos[0]) != len(blocos[1]):
+        return []
+
+    return list(zip(*blocos))
+
+
+def diagnosticar_colunas_separadas(texto):
+    """Quando o texto tem cara de duas colunas de coordenadas geográficas
+    (um bloco de longitudes e um de latitudes) mas com quantidades
+    diferentes — tipicamente uma linha perdida ou duplicada no OCR —,
+    devolve uma mensagem explicando, em vez de deixar o texto cair no
+    reconhecimento genérico e gerar um polígono errado sem aviso. Devolve
+    None quando não é esse caso."""
+
+    for valores in (_valores_gms_do_texto(texto), _valores_decimais_do_texto(texto)):
+
+        blocos = _localizar_blocos_lon_lat(valores)
+
+        if blocos is not None and len(blocos[0]) != len(blocos[1]):
+
+            return (
+                f"Foram encontradas {len(blocos[0])} longitudes e "
+                f"{len(blocos[1])} latitudes no texto, mas cada vértice "
+                "precisa de uma longitude e uma latitude. Provavelmente o "
+                "OCR perdeu ou duplicou uma linha — confira o texto "
+                "colado com a tabela original."
+            )
+
+    blocos_utm = _localizar_blocos_utm(_valores_utm_do_texto(texto))
+
+    if blocos_utm is not None and len(blocos_utm[0]) != len(blocos_utm[1]):
+
+        return (
+            f"Foram encontrados {len(blocos_utm[0])} valores de Este e "
+            f"{len(blocos_utm[1])} de Norte no texto, mas cada vértice "
+            "precisa de um Este e um Norte. Provavelmente o OCR perdeu "
+            "ou duplicou uma linha — confira o texto colado com a "
+            "tabela original."
+        )
+
+    return None
 
 
 # Par de coordenadas UTM rotuladas com N e E, em qualquer ordem — comum em
@@ -1216,12 +1614,23 @@ def classificar_par(a, b):
     """Classifica um par de números como 'geografico', 'utm' ou 'indefinido'
     com base na magnitude dos valores, sem assumir qual é qual. Serve só
     para avisar o usuário de uma possível incompatibilidade — nunca para
-    sobrescrever uma escolha explícita de formato."""
+    sobrescrever uma escolha explícita de formato.
+
+    O Coleta Rural atende só o Brasil, que fica inteiro no quadrante
+    sudoeste — longitude e latitude são sempre negativas (a exceção é
+    uma faixa estreita do extremo norte, com latitude ligeiramente
+    positiva, fora da área de atuação do INCRA Pernambuco a que este
+    plugin se destina). Por isso um par só é classificado como
+    'geografico' se os dois valores forem negativos: um valor positivo
+    com magnitude pequena não é uma coordenada geográfica válida por
+    aqui — é sinal de um fragmento (minutos/segundos de um valor mal
+    interpretado, por exemplo) sendo confundido com a coordenada
+    inteira, que sem essa checagem passaria batido como plausível."""
 
     maior = max(abs(a), abs(b))
     menor = min(abs(a), abs(b))
 
-    geografico = maior <= 180 and menor <= 90
+    geografico = maior <= 180 and menor <= 90 and a < 0 and b < 0
 
     utm = 1000 <= abs(a) <= 10000000 and 1000 <= abs(b) <= 10000000
 
@@ -1466,3 +1875,288 @@ def poligonos_conectados(geometrias):
     return len(raizes) == 1
 
     return None
+
+
+# ----------------------------------------------------------------------
+# Declara Rural (Declaração de Posse Mansa e Pacífica) — formato padrão
+# de leitura, tratado como o memorial do Coleta Rural
+# ----------------------------------------------------------------------
+
+def _sem_acentos(texto):
+    """Remove acentos preservando o comprimento (1 caractere -> 1
+    caractere), para que posições no texto sem acento valham no original."""
+
+    import unicodedata
+
+    return "".join(
+        unicodedata.normalize("NFD", c)[0] for c in texto
+    )
+
+
+def eh_declara_rural(texto):
+    """True se o texto extraído do PDF é uma Declaração de Posse do app
+    Declara Rural (código 'Cód. DR-...' no rodapé, ou o título e a seção
+    de identificação do imóvel)."""
+
+    plano = _sem_acentos(texto).upper()
+
+    if re.search(r"COD\.\s*DR-\d", plano):
+        return True
+
+    return (
+        "POSSE MANSA E PACIFICA" in plano
+        and "IDENTIFICACAO DO IMOVEL E DA POSSE" in plano
+    )
+
+
+# rótulos conhecidos (sem acento, maiúsculos) que delimitam um valor
+_ROTULOS_DECLARA_RURAL = (
+    "NOME COMPLETO", "NACIONALIDADE", "NATURALIDADE", "DATA DE NASCIMENTO",
+    "ESTADO CIVIL", "CPF", "RG/DOCUMENTO", "ORGAO EXP", "ENDERECO/DOMICILIO",
+    "DENOMINACAO DO IMOVEL RURAL", "MUNICIPIO DE LOCALIZACAO",
+    "INDICACOES PARA LOCALIZACAO", "COORDENADA GEOGRAFICA", "AREA TOTAL",
+    "DATA DE INICIO DA POSSE", "PRESENCA NO LOCAL", "FORMA DE ORIGEM DA POSSE",
+    "VALOR DA AQUISICAO", "CIR - CODIGO", "CAR - CADASTRO", "CIB - CODIGO",
+    "DOCUMENTOS ANEXOS", "MUNICIPIO SEDE", "COORDENADA DA SEDE",
+    "VALOR DO IMOVEL", "DOCUMENTACAO DA",
+)
+
+
+def _linha_e_rotulo_declara(linha):
+    plano = _sem_acentos(linha).strip().upper()
+
+    if not plano:
+        return False
+
+    if re.match(r"^\d(\.\d)?\s+[A-Z]{3}", plano):
+        # cabeçalho de seção ("2 IDENTIFICAÇÃO DO IMÓVEL...", "1.1 CÔNJUGE")
+        return True
+
+    if re.match(r"^(IN INCRA|COD\. DR-|PAGINA \d)", plano):
+        return True
+
+    return any(plano.startswith(r) for r in _ROTULOS_DECLARA_RURAL)
+
+
+def _secao_declara(texto, inicio, fim):
+    """Trecho do texto entre dois marcadores (regex, sem acento)."""
+
+    plano = _sem_acentos(texto)
+
+    m_ini = re.search(inicio, plano, re.IGNORECASE)
+
+    if not m_ini:
+        return ""
+
+    m_fim = re.search(fim, plano[m_ini.end():], re.IGNORECASE)
+
+    fim_pos = m_ini.end() + m_fim.start() if m_fim else len(plano)
+
+    return texto[m_ini.end():fim_pos]
+
+
+def _valor_do_rotulo_declara(secao, rotulo):
+    """Valor que vem nas linhas seguintes ao rótulo (até o próximo rótulo)."""
+
+    linhas = secao.splitlines()
+    alvo = _sem_acentos(rotulo).upper()
+
+    for i, linha in enumerate(linhas):
+
+        if _sem_acentos(linha).strip().upper().startswith(alvo):
+
+            valor = []
+
+            for seguinte in linhas[i + 1:]:
+
+                if not seguinte.strip() or _linha_e_rotulo_declara(seguinte):
+                    break
+
+                valor.append(seguinte.strip())
+
+            return " ".join(valor).strip()
+
+    return ""
+
+
+def extrair_dados_declara_rural(texto):
+    """Extrai os dados do imóvel/possuidor de uma Declaração de Posse do
+    Declara Rural. Devolve um dict com imovel, municipio, uf, declarante,
+    cpf, area (ex.: '120,1621 ha'), cir, car e datum."""
+
+    possuidor = _secao_declara(
+        texto,
+        r"IDENTIFICACAO DO\(A\) POSSUIDOR\(A\)",
+        r"\n\s*1\.1\s+CONJUGE|\n\s*2\s+IDENTIFICACAO DO IMOVEL"
+    )
+
+    imovel = _secao_declara(
+        texto,
+        r"\n\s*2\s+IDENTIFICACAO DO IMOVEL E DA POSSE",
+        r"\n\s*3\s+DECLARACOES LEGAIS|DOCUMENTOS ANEXOS"
+    )
+
+    dados = {
+        "imovel": _valor_do_rotulo_declara(
+            imovel, "DENOMINAÇÃO DO IMÓVEL RURAL"
+        ),
+        "declarante": _valor_do_rotulo_declara(possuidor, "NOME COMPLETO"),
+        "cpf": _valor_do_rotulo_declara(possuidor, "CPF"),
+        "municipio": "",
+        "uf": "",
+        "area": "",
+        "cir": "",
+        "car": "",
+        "datum": "",
+    }
+
+    # com o imóvel em vários municípios o rótulo vira "MUNICÍPIO SEDE — UF"
+    local = (
+        _valor_do_rotulo_declara(imovel, "MUNICÍPIO DE LOCALIZAÇÃO")
+        or _valor_do_rotulo_declara(imovel, "MUNICÍPIO SEDE")
+    )
+
+    partes = re.split(r"\s*[—–/]\s*|\s+-\s+", local)
+
+    dados["municipio"] = partes[0].strip() if partes else ""
+
+    if len(partes) > 1 and re.fullmatch(r"[A-Za-z]{2}", partes[-1].strip()):
+        dados["uf"] = partes[-1].strip().upper()
+
+    area = _valor_do_rotulo_declara(imovel, "ÁREA TOTAL")
+
+    m_area = re.search(r"(\d[\d.]*(?:,\d+)?)", area)
+
+    if m_area:
+        dados["area"] = f"{m_area.group(1)} ha"
+
+    cir = _valor_do_rotulo_declara(imovel, "CIR - CÓDIGO")
+
+    if re.fullmatch(r"\d{3}\.\d{3}\.\d{3}\.\d{3}-\d", cir):
+        dados["cir"] = cir
+
+    dados["car"] = _valor_do_rotulo_declara(imovel, "CAR - CADASTRO")
+
+    m_datum = re.search(
+        r"datum\s+(SIRGAS\s*2000|SAD\s*[-]?\s*69|WGS\s*[-]?\s*84)",
+        texto,
+        re.IGNORECASE
+    )
+
+    if m_datum:
+        bruto = re.sub(r"[\s\-]", "", m_datum.group(1)).upper()
+        dados["datum"] = bruto  # SIRGAS2000 | SAD69 | WGS84
+
+    if not dados["imovel"]:
+        _completar_declara_texto_corrido(texto, dados)
+
+    return dados
+
+
+def _completar_declara_texto_corrido(texto, dados):
+    """Modelo antigo de prefeitura ('Declaração de Constatação de Posse'),
+    em texto corrido, sem rótulos."""
+
+    plano = re.sub(r"\s+", " ", texto)
+
+    padroes = {
+        "declarante": r"identificou que (?:o senhor\(a\)|a senhora) (.+?),",
+        "imovel": r"im[óo]vel rural denominado: (.+?), localizado",
+        "cir": r"c[óo]digo CIR: (\d{3}\.\d{3}\.\d{3}\.\d{3}-\d)",
+    }
+
+    for chave, padrao in padroes.items():
+
+        m = re.search(padrao, plano)
+
+        if m:
+            dados[chave] = m.group(1).strip()
+
+    m = re.search(
+        r"identificou que .+?inscrito\(a\) no CPF (\d{3}\.\d{3}\.\d{3}-\d{2})",
+        plano
+    )
+
+    if m:
+        dados["cpf"] = m.group(1)
+
+    m = re.search(
+        r"munic[íi]pio de ([^,]+), estado de ([A-Z]{2}), com uma [áa]rea de "
+        r"([\d.,]+) ha",
+        plano
+    )
+
+    if m:
+        dados["municipio"] = m.group(1).strip()
+        dados["uf"] = m.group(2)
+        dados["area"] = f"{m.group(3)} ha"
+
+
+def extrair_vertices_declara_rural(texto):
+    """Lê a tabela 'COORDENADAS GEOGRÁFICAS' do Declara Rural (graus
+    decimais com '°', blocos VÉRTICE/LATITUDE/LONGITUDE lado a lado).
+    Devolve [(numero, latitude, longitude)] ordenado pelo número do vértice,
+    não pela ordem do texto. O ponto único 'COORDENADA GEOGRÁFICA' do
+    cabeçalho do imóvel (sem rótulo P#) não entra."""
+
+    padrao = re.compile(
+        r"(?<![A-Za-z0-9])P\s?(\d{1,4})\s+"
+        r"([-+−]?\d{1,3}[.,]\d+)\s*°\s+"
+        r"([-+−]?\d{1,3}[.,]\d+)\s*°"
+    )
+
+    plano = texto.replace("−", "-")
+
+    # versões anteriores do app imprimiam a tabela sem o "°" — só aceito
+    # assim dentro da seção "COORDENADAS GEOGRÁFICAS"
+    if not padrao.search(plano):
+
+        secao = re.search(
+            r"COORDENADAS GEOGR[ÁA]FICAS\s*\n\s*V[ÉE]RTICE.*",
+            plano,
+            re.DOTALL
+        )
+
+        if secao:
+            plano = secao.group(0)
+            padrao = re.compile(
+                r"(?<![A-Za-z0-9])P\s?(\d{1,4})\s+"
+                r"([-+]?\d{1,3}[.,]\d{4,})\s+"
+                r"([-+]?\d{1,3}[.,]\d{4,})"
+            )
+
+    # a ordem das colunas vem do cabeçalho da tabela (padrão: latitude
+    # primeiro)
+    longitude_primeiro = bool(
+        re.search(
+            r"V[ÉE]RTICE\s+LONGITUDE\s+LATITUDE",
+            plano,
+            re.IGNORECASE
+        )
+    )
+
+    encontrados = {}
+
+    for m in padrao.finditer(plano):
+
+        numero = int(m.group(1))
+
+        if numero in encontrados:
+            continue
+
+        a = float(m.group(2).replace(",", "."))
+        b = float(m.group(3).replace(",", "."))
+
+        lat, lon = (b, a) if longitude_primeiro else (a, b)
+
+        # segurança: no Brasil a latitude nunca passa de ~34° em módulo e
+        # a longitude fica entre ~28° e ~75°
+        if abs(lat) > 35 and abs(lon) <= 35:
+            lat, lon = lon, lat
+
+        if abs(lat) > 90 or abs(lon) > 180:
+            continue
+
+        encontrados[numero] = (numero, lat, lon)
+
+    return [encontrados[n] for n in sorted(encontrados)]

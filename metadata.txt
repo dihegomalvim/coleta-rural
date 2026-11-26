@@ -8,7 +8,7 @@ qgisMinimumVersion=3.28
 
 description=Imports Coleta Rural PDF survey reports and other memorial descritivo formats (any Brazilian state), automatically creating polygon features in QGIS vector layers — and generates memorial descritivo PDF reports from selected polygons, recognizing SIGEF/CAR public layers.
 
-version=1.2.3
+version=1.2.5
 
 author=Dihêgo Augusto Gomes Malvim de Barros - INCRA Pernambuco
 
@@ -39,6 +39,19 @@ deprecated=False
 server=False
 
 changelog=
+    1.2.5
+    - Lê os documentos do Coleta Pro (PDF): memorial descritivo em tabelas (atual e das primeiras versões, em UTM), memorial em texto corrido (UTM, geográfica decimal ou GMS do SIGEF), memorial de remembramento e planta de levantamento georreferenciado. Só o perímetro principal é importado (as parcelas repetidas no fim do PDF não são somadas); com poligonais separadas, o plugin pergunta qual importar.
+    - Declara Rural: reconhece também imóveis em vários municípios, a tabela sem o símbolo de grau das versões anteriores e o modelo antigo de prefeitura em texto corrido.
+    - Ao selecionar outro PDF na aba "Memorial Coleta Rural", CIR, Matrícula e vértices do documento anterior são limpos.
+    1.2.4
+    - Novo formato padrão de leitura: Declaração de Posse Mansa e Pacífica do app Declara Rural. Na aba "Memorial Coleta Rural" (e também no Memorial Genérico) o PDF é lido como o memorial do Coleta Rural: imóvel, município/UF, possuidor (declarante), CPF, área e CIR pelos rótulos do documento, e os vértices pela tabela de coordenadas geográficas (graus decimais, SIRGAS 2000), ordenados pelo número do vértice.
+    - Reconhece memoriais tabelados e plantas com tabela de coordenadas (graus-minutos-segundos ou decimais): o OCR que despeja todas as longitudes numa coluna e só depois todas as latitudes agora é pareado automaticamente (i-ésima longitude com i-ésima latitude), sem passar pelo Excel. Qual bloco é longitude e qual é latitude é decidido pela geografia do Brasil; se as quantidades não baterem, avisa quantas encontrou de cada.
+    - O mesmo para coordenadas planas (UTM) sem cabeçalhos "Norte"/"Este": todos os Este e depois todos os Norte (ou o contrário) são pareados automaticamente; quantidades diferentes geram aviso.
+    - Reconhece também tabelas coladas lado a lado (tab, espaço, vírgula ou barra vertical, com ou sem rótulo de vértice, em qualquer ordem de colunas).
+    - Valores sem o sinal "-" (OCR) são interpretados no quadrante sudoeste; sinal explícito é sempre respeitado.
+    - Aspas tipográficas e duas aspas simples (variações de OCR) agora são aceitas nas coordenadas em graus-minutos-segundos.
+    - Corrigido um bug grave em que alguns memoriais desenhavam um polígono absurdo (esticado por vários estados). Acontecia com memoriais que listam longitude;latitude em graus-minutos-segundos entre aspas, um par por linha, sem rótulo nem letra de hemisfério (ex.: -35°03'43,486";-08°05'54,295") — formato comum em levantamento georreferenciado, que caía no reconhecimento genérico (feito para tabelas UTM simples) e confundia fragmentos do valor com a coordenada inteira. Agora tem reconhecimento próprio. Também corrigido: vírgula decimal dos segundos trocada por aspa simples (erro comum de OCR/digitação, ex.: 02'397" em vez de 02,397") — antes descartava ou errava esse vértice; agora é tolerado em qualquer formato de coordenada.
+    - Reforçado o reconhecimento genérico de números soltos (último recurso) com uma regra geográfica: como o plugin atende só o Brasil (sempre no quadrante sudoeste), longitude e latitude são sempre negativas — um par positivo de magnitude pequena não é mais aceito como coordenada geográfica válida, e agora sempre aparece no aviso de vértice não confiável (antes passava batido, sem nenhum sinal).
     1.2.3
     Aba "Memorial Genérico":
     - Reconhecimento de memoriais descritivos em formato de poligonal (azimute e distância entre vértices, a partir de um vértice inicial com coordenada UTM conhecida), formato topográfico tradicional comum em memoriais mais antigos.
